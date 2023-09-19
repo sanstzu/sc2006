@@ -1,0 +1,57 @@
+name: Mirror Repository to a Folder
+run-name: Pushing commits by ${{ github.actor }}
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/workflows/**"
+jobs:
+  Mirroring:
+    runs-on: ubuntu-latest
+    environment: submission
+    steps:
+      - name: Create .ssh directory
+        run: |
+          mkdir -p ~/.ssh
+
+      - name: Setup known hosts
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
+
+      - name: Setup Git Config
+        run: |
+          git config --global user.name ${{ github.actor }}
+          git config --global user.email ${{ github.actor }}@users.noreply.github.com
+
+      - name: Clone Target Repository
+        run: |
+          git clone git@github.com:${{ vars.TARGET_REPOSITORY_OWNER }}/${{ vars.TARGET_REPOSITORY_NAME }}.git ./target-repo
+
+      - name: Removing Current Repository in Target Folder
+        run: |
+          rm -rf ./target-repo/${{ vars.TARGET_FOLDER }}
+
+      - name: Copying Repository to Target Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: ./target-repo/${{ vars.TARGET_FOLDER }}
+
+      - name: Removing GitHub Folders
+        run: |
+          rm -rf ./target-repo/${{ vars.TARGET_FOLDER }}/.github
+          rm -rf ./target-repo/${{ vars.TARGET_FOLDER }}/.git
+      - name: Push to Target Repository
+        run: |
+          cd target-repo
+          git add .
+          git commit -m "Mirrored from Private Repository"
+          git push
