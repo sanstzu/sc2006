@@ -4,7 +4,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "07:00:00",
-    "EndTime": "17:00:00",
+    "EndTime": "16:59:59",
     "Price": 2.6,
     "IsSingleEntry": false
   },
@@ -22,7 +22,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "00:00:00",
-    "EndTime": "04:00:00",
+    "EndTime": "03:59:59",
     "Price": 3,
     "IsSingleEntry": true
   },
@@ -31,7 +31,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "04:00:00",
-    "EndTime": "07:00:00",
+    "EndTime": "06:59:59",
     "Price": 2.6,
     "IsSingleEntry": false
   },
@@ -49,7 +49,7 @@
     "LotType": "C",
     "Day": "Saturday",
     "StartTime": "00:00:00",
-    "EndTime": "04:00:00",
+    "EndTime": "03:59:59",
     "Price": 2.6,
     "IsSingleEntry": false
   },
@@ -58,7 +58,7 @@
     "LotType": "C",
     "Day": "Saturday",
     "StartTime": "04:00:00",
-    "EndTime": "07:00:00",
+    "EndTime": "06:59:59",
     "Price": 2.6,
     "IsSingleEntry": false
   },
@@ -76,16 +76,7 @@
     "LotType": "C",
     "Day": "Sunday",
     "StartTime": "00:00:00",
-    "EndTime": "04:00:00",
-    "Price": 2.6,
-    "IsSingleEntry": false
-  },
-  {
-    "CarParkID": 1,
-    "LotType": "C",
-    "Day": "Sunday",
-    "StartTime": "04:00:00",
-    "EndTime": "07:00:00",
+    "EndTime": "03:59:59",
     "Price": 2.6,
     "IsSingleEntry": false
   },
@@ -130,6 +121,15 @@
     "LotType": "C",
     "Day": "Saturday",
     "StartTime": "20:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.0,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 11,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
     "EndTime": "06:59:59",
     "Price": 3.0,
     "IsSingleEntry": false
@@ -157,6 +157,15 @@
     "LotType": "C",
     "Day": "Sunday",
     "StartTime": "20:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.0,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 11,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
     "EndTime": "06:59:59",
     "Price": 3.0,
     "IsSingleEntry": false
@@ -184,6 +193,15 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "17:00:01",
+    "EndTime": "23:59:59",
+    "Price": 2.2,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 12,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
     "EndTime": "02:00:59",
     "Price": 2.2,
     "IsSingleEntry": true
@@ -202,6 +220,15 @@
     "LotType": "C",
     "Day": "Saturday",
     "StartTime": "07:00:00",
+    "EndTime": "23:59:59",
+    "Price": 1.2,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 12,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
     "EndTime": "02:00:59",
     "Price": 1.2,
     "IsSingleEntry": true
@@ -210,8 +237,8 @@
     "CarParkID": 12,
     "LotType": "C",
     "Day": "Saturday",
-    "StartTime": "02:00:01",
-    "EndTime": "07:00:00",
+    "StartTime": "02:01:00",
+    "EndTime": "06:59:59",
     "Price": 1.1,
     "IsSingleEntry": true
   },
@@ -220,6 +247,15 @@
     "LotType": "C",
     "Day": "Sunday",
     "StartTime": "07:00:00",
+    "EndTime": "23:59:59",
+    "Price": 1.2,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 12,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
     "EndTime": "02:00:59",
     "Price": 1.2,
     "IsSingleEntry": true
@@ -228,8 +264,8 @@
     "CarParkID": 12,
     "LotType": "C",
     "Day": "Sunday",
-    "StartTime": "02:00:01",
-    "EndTime": "07:00:00",
+    "StartTime": "02:01:00",
+    "EndTime": "06:59:59",
     "Price": 1.1,
     "IsSingleEntry": true
   },
@@ -238,7 +274,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "00:01:00",
-    "EndTime": "12:00:00",
+    "EndTime": "12:00:59",
     "Price": 2.56,
     "IsSingleEntry": true
   },
@@ -247,7 +283,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "12:01:00",
-    "EndTime": "14:00:00",
+    "EndTime": "14:00:59",
     "Price": 3.64,
     "IsSingleEntry": true
   },
@@ -408,7 +444,7 @@
     "CarParkID": 14,
     "LotType": "C",
     "Day": "Weekday",
-    "StartTime": "14:00:00",
+    "StartTime": "11:00:00",
     "EndTime": "13:59:59",
     "Price": 3.57,
     "IsSingleEntry": false
@@ -714,7 +750,7 @@
     "CarParkID": 18,
     "LotType": "C",
     "Day": "Weekday",
-    "StartTime": "06:01:00",
+    "StartTime": "18:00:00",
     "EndTime": "23:59:59",
     "Price": 6.0,
     "IsSingleEntry": true
@@ -741,7 +777,7 @@
     "CarParkID": 18,
     "LotType": "C",
     "Day": "Saturday",
-    "StartTime": "06:01:00",
+    "StartTime": "18:00:00",
     "EndTime": "23:59:59",
     "Price": 6.0,
     "IsSingleEntry": true
@@ -768,7 +804,7 @@
     "CarParkID": 18,
     "LotType": "C",
     "Day": "Sunday",
-    "StartTime": "06:01:00",
+    "StartTime": "18:00:00",
     "EndTime": "23:59:59",
     "Price": 6.0,
     "IsSingleEntry": true
@@ -796,7 +832,7 @@
     "LotType": "C",
     "Day": "Weekday",
     "StartTime": "18:00:00",
-    "EndTime": "232:59:59",
+    "EndTime": "23:59:59",
     "Price": 2.6,
     "IsSingleEntry": true
   },
@@ -859,7 +895,7 @@
     "LotType": "C",
     "Day": "Sunday",
     "StartTime": "07:00:00",
-    "EndTime": "18:00:00",
+    "EndTime": "17:59:59",
     "Price": 1.4,
     "IsSingleEntry": false
   },
