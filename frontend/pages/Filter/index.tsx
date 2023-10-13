@@ -1,12 +1,12 @@
 import { Button, StyleSheet, Text, View } from "react-native";
 
-const name = "ParkingInfoPage";
+export const name = "FilterPage";
 
-const options = {
-  title: "ParkingInfo",
+export const options = {
+  title: "Filter Page",
 };
 
-function children() {
+export default function Filter() {
   return (
     <View style={styles.page}>
       <Text>Hello world!</Text>
@@ -17,5 +17,3 @@ function children() {
 const styles = StyleSheet.create({
   page: { flex: 1, alignItems: "center", justifyContent: "center" },
 });
-
-export default { name, children, options };

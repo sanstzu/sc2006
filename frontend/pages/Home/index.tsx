@@ -1,41 +1,39 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
+import { RootStackParamList } from "../../App";
 
-const name = "HomeScreen";
-
-const options = {
-  title: "Home Screen",
-};
-
-function component({ navigation }) {
+export default function Home({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Home">) {
   return (
     <View style={styles.page}>
       <Text>Hello world!</Text>
       <Button
         icon="map"
         mode="contained"
-        onPress={() => navigation.navigate("DisplayPage")}
+        onPress={() => navigation.navigate("Display")}
       >
         Go to Display
       </Button>
       <Button
         icon="magnify"
         mode="contained"
-        onPress={() => navigation.navigate("SearchPage")}
+        onPress={() => navigation.navigate("Search")}
       >
         Go to Search
       </Button>
       <Button
         icon="filter"
         mode="contained"
-        onPress={() => navigation.navigate("FilterPage")}
+        onPress={() => navigation.navigate("Filter")}
       >
         Go to FilterPage
       </Button>
       <Button
         icon="car"
         mode="contained"
-        onPress={() => navigation.navigate("ParkingInfoPage")}
+        onPress={() => navigation.navigate("ParkingInfo")}
       >
         Go to ParkingInfo
       </Button>
@@ -46,5 +44,3 @@ function component({ navigation }) {
 const styles = StyleSheet.create({
   page: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
 });
-
-export default { name, component, options };
