@@ -39,7 +39,25 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_DATABASE: ${DB_DATABASE}
+      DB_UPDATER_AVAILABILITY_FREQUENCY: ${DB_UPDATER_AVAILABILITY_FREQUENCY}
+      DB_UPDATER_PRICE_FREQUENCY: ${DB_UPDATER_PRICE_FREQUENCY}
+      DB_UPDATER_LTA_KEY: ${DB_UPDATER_LTA_KEY}
+      DB_UPDATER_URA_KEY: ${DB_UPDATER_URA_KEY}
+
     volumes:
       - ./database-updater:/var/www/db-updater
+  api:
+    container_name: sc2006-api
+    build: ./api
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DB_HOST: database
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+    volumes:
+      - ./api:/var/www/api
 volumes:
   db-volume:
