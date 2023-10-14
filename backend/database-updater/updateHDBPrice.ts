@@ -68,7 +68,6 @@ export default async function updateHDBPrice() {
       "','"
     )}')`
   );
-  console.log(count);
 
   console.log(
     `${new Date().toISOString()} Updated price database of with HDB prices.`
