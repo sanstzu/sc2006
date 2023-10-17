@@ -3,7 +3,7 @@ import mapsRoutes from "./routes/maps";
 import parkingRoutes from "./routes/parking";
 
 const app = express();
-const port = 3000;
+const port = 8080;
 
 app.use(express.json());
 
