@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prod": "ts-node -r tsconfig-paths/register src/index.ts",
-    "dev": "nodemon -r tsconfig-paths/register"
+    "dev": "nodemon --legacy-watch -r tsconfig-paths/register"
   },
   "author": "",
   "license": "ISC",
