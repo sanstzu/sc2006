@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { MD3LightTheme, PaperProvider } from "react-native-paper";
 import HomeScreen from "./pages/Home";
-import ParkingInfo from "./pages/ParkingInfo";
+import ParkingInfo from "./pages/Result";
 import Filter from "./pages/Filter";
 import Display from "./pages/Display";
 import Search from "./pages/Search";
@@ -14,7 +14,7 @@ export type RootStackParamList = {
   Home: undefined;
   Display: undefined;
   Search: undefined;
-  ParkingInfo: undefined;
+  Result: undefined;
   Filter: undefined;
 };
 
@@ -43,8 +43,8 @@ export default function App() {
             component={Search}
           />
           <Stack.Screen
-            name="ParkingInfo"
-            options={{ title: "Parking Info Screen" }}
+            name="Result"
+            options={{ title: "Result Screen" }}
             component={ParkingInfo}
           />
           <Stack.Screen
