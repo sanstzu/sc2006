@@ -2457,5 +2457,509 @@
     "EndTime": "23:59:59",
     "Price": 1.65,
     "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.35,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.55,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 2.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.55,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 62,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 2.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.35,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 0.45,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 63,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 0.45,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.35,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 64,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.65,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.6,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.6,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 65,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 2.6,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.4,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.3,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "14:59:59",
+    "Price": 0.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "15:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.3,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "14:59:59",
+    "Price": 0.65,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "15:00:00",
+    "EndTime": "17:59:59",
+    "Price": 2.6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 66,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.3,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "06:00:00",
+    "EndTime": "22:59:59",
+    "Price": 2.4,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "23:00:00",
+    "EndTime": "23:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "05:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "06:00:00",
+    "EndTime": "22:59:59",
+    "Price": 2.4,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "23:00:00",
+    "EndTime": "23:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "05:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "06:00:00",
+    "EndTime": "22:59:59",
+    "Price": 2.4,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "23:00:00",
+    "EndTime": "23:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 7,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "05:59:59",
+    "Price": 6,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 8,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "08:00:00",
+    "EndTime": "23:00:00",
+    "Price": 1.61,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 8,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "08:00:00",
+    "EndTime": "23:00:00",
+    "Price": 5.35,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 8,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "08:00:00",
+    "EndTime": "23:00:00",
+    "Price": 5.35,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "00:00:00",
+    "EndTime": "17:59:59",
+    "Price": 1.95,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Weekday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.25,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 0.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 3.25,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Saturday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.25,
+    "IsSingleEntry": true
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "00:00:00",
+    "EndTime": "02:59:59",
+    "Price": 0.55,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "03:00:00",
+    "EndTime": "17:59:59",
+    "Price": 3.25,
+    "IsSingleEntry": false
+  },
+  {
+    "CarParkID": 9,
+    "LotType": "C",
+    "Day": "Sunday",
+    "StartTime": "18:00:00",
+    "EndTime": "23:59:59",
+    "Price": 3.25,
+    "IsSingleEntry": true
   }
 ]

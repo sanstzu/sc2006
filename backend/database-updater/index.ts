@@ -9,7 +9,9 @@ initializeConnection()
     console.log(
       `${new Date().toISOString()} Initialized connection to database.`
     );
-
+    console.log(
+      `Running with these env variables: ${JSON.stringify(process.env)}`
+    );
     // Insert update functions here
     updateAvailability();
     setInterval(
@@ -20,13 +22,13 @@ initializeConnection()
     updateHDBPrice();
     setInterval(
       updateHDBPrice,
-      1000 * 60 * 60 * parseInt(process.env.DB_UPDATER_PRICE_FREQUENCY ?? "12")
+      1000 * parseInt(process.env.DB_UPDATER_PRICE_FREQUENCY ?? "12")
     ); // every 12 hours
 
     updateURAPrice();
     setInterval(
       updateURAPrice,
-      1000 * 60 * 60 * parseInt(process.env.DB_UPDATER_PRICE_FREQUENCY ?? "12")
+      1000 * parseInt(process.env.DB_UPDATER_PRICE_FREQUENCY ?? "12")
     ); // every 12 hours
 
     initializeLTAPrice();
