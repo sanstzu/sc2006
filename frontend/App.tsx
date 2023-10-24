@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import { PaperProvider } from "react-native-paper";
+import { MD3LightTheme, PaperProvider } from "react-native-paper";
 import HomeScreen from "./pages/Home";
 import ParkingInfo from "./pages/ParkingInfo";
 import Filter from "./pages/Filter";
@@ -22,7 +22,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <PaperProvider>
+    <PaperProvider theme={MD3LightTheme}>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
