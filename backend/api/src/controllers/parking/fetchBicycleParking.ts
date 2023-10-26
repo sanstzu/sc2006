@@ -91,9 +91,7 @@ async function fetchBicycleParking(
       message: "success",
       data: parkingDetails,
     });
-  } 
-  
-  catch (error) {
+  } catch (error) {
     return res.status(500).json({
       status: 0,
       message: "Internal server error",

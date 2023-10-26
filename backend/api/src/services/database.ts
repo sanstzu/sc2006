@@ -11,7 +11,6 @@ export async function initializeConnection() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
   });
-  
 }
 
 export async function query(query: string): Promise<[object[], object]> {
