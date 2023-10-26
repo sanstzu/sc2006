@@ -33,9 +33,9 @@ export default function Home({
       <Button
         icon="car"
         mode="contained"
-        onPress={() => navigation.navigate("ParkingInfo")}
+        onPress={() => navigation.navigate("Result")}
       >
-        Go to ParkingInfo
+        Go to Result
       </Button>
     </View>
   );
