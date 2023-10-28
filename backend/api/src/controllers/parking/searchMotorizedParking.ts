@@ -2,22 +2,11 @@ import { Request, Response } from "express";
 import { ResponseType } from "@/types/response";
 import { query } from "@/services/database";
 
-// type SearchMotorizedParkingType = {
-//   CarParkID: string;
-//   LotType : string;
-//   AvailableLots: string;
-//   Name: string;
-//   Price: number;
-//   Day: string;
-//   StartTime: string;
-//   EndTime: string;
-//   Distance: number;
-// };
 type SearchMotorizedParkingType = any;
  
 async function searchMotorizedParking(
   req: Request,
-  res: Response<ResponseType<SearchMotorizedParkingType>>
+  res: Response<ResponseType<SearchMotorizedParkingType[]>>
 ) { 
   
   let {
@@ -48,7 +37,7 @@ async function searchMotorizedParking(
       });
   }
   
-  const [rows, fields] = await query(
+  const [rows, fields] : [object[], object] = await query(
     `WITH Dist AS (
       SELECT Coordinate,
         ST_Distance_Sphere(
@@ -58,15 +47,12 @@ async function searchMotorizedParking(
         ) AS Distance
         FROM MotorizedParking
     )
-    SELECT 
-    MP.CarParkID,
+    SELECT
+    ST_X(MP.Coordinate) AS Latitude,
+    ST_Y(MP.Coordinate) AS Longitude,
     MP.LotType,
     MP.AvailableLots,
     MP.Development AS Name,
-    PP.Price,
-    PP.Day,
-    PP.StartTime,
-    PP.EndTime,
     D.Distance
     FROM MotorizedParking AS MP
     JOIN ParkingPrice AS PP
@@ -82,10 +68,28 @@ async function searchMotorizedParking(
     LIMIT 10;`
   );
 
+  let respData: SearchMotorizedParkingType[] = [];
+  rows.forEach((obj: SearchMotorizedParkingType) => {
+    if (obj.LotType === 'C') obj.LotType = 'Car';
+    else if (obj.LotType === 'H') obj.LotType = 'Heavy';
+    else if (obj.LotType === 'Y') obj.LotType = 'Motor';
+
+    respData.push({
+      'type': obj.LotType,
+      'name': obj.Name,
+      'availableLots': obj.AvailableLots,
+      'coordinate': {
+        'latitude': obj.Latitude,
+        'longitude': obj.Longitude
+      },
+      'distance': obj.Distance
+    });
+  });
+
   res.status(200).json({
     status : 1,
     message : 'success',
-    data : rows
+    data : respData
   });
 }
 

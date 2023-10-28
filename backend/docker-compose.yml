@@ -61,6 +61,7 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       DB_UPDATER_LTA_KEY: ${DB_UPDATER_LTA_KEY}
       DB_UPDATER_URA_KEY: ${DB_UPDATER_URA_KEY}
+      GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_KEY}
     volumes:
       - ./api:/var/www/api
 volumes:

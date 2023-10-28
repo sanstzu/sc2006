@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import { ResponseType } from "@/types/response";
 import axios from "axios";
 import { getDistance } from "geolib";
+
 type SearchBicycleParkingType = {
-  Latitude: number;
-  Longitude: number;
-  Description: string;
+  type: "Bicycle";
+  Name: string;
   RackType: string;
-  RackCount: string;
-  SheltherIndicator: String;
+  RackCount: number;
+  ShelterIndicator: "Y" | "N";
   Distance: number;
 };
 
@@ -42,13 +42,30 @@ async function searchBicycleParking(
   });
 
   let result = resp.data.value;
-  result.forEach((obj: SearchBicycleParkingType) => {
+  let respData: SearchBicycleParkingType[] = [];
+
+  result.forEach((obj: {
+    Latitude: number;
+    Longitude: number;
+    Description: string;
+    RackType: string;
+    RackCount: number;
+    ShelterIndicator: "Y" | "N";
+  }) => {
     let objCoor: coordinate = {latitude: obj.Latitude, longitude: obj.Longitude};
-    obj.Distance = getDistance(coor, objCoor);
+    
+    respData.push({
+      type: "Bicycle",
+      Name: obj.Description,
+      RackType: obj.RackType,
+      RackCount: obj.RackCount,
+      ShelterIndicator: obj.ShelterIndicator,
+      Distance: getDistance(coor, objCoor),
+    });
   });
 
 
-  let sortedResult: SearchBicycleParkingType[] = result.sort((obj1: SearchBicycleParkingType, obj2: SearchBicycleParkingType) => {
+  let sortedResult: SearchBicycleParkingType[] = respData.sort((obj1: SearchBicycleParkingType, obj2: SearchBicycleParkingType) => {
     return obj1.Distance - obj2.Distance;
   });
 
