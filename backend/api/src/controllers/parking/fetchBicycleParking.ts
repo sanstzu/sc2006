@@ -4,12 +4,11 @@ import axios from "axios";
 import { getDistance } from "geolib";
 
 type GetBicycleParkingType = {
-  Latitude: number;
-  Longitude: number;
-  Description: string;
+  type: "Bicycle";
+  Name: string;
   RackType: string;
-  RackCount: string;
-  SheltherIndicator: String;
+  RackCount: number;
+  ShelterIndicator: "Y" | "N";
   Distance: number;
 };
 
@@ -44,15 +43,42 @@ async function fetchBicycleParking(
   });
 
   let result = resp.data.value;
-  result.forEach((obj: GetBicycleParkingType) => {
+  let respData: GetBicycleParkingType[] = [];
+
+  result.forEach((obj: {
+    Latitude: number;
+    Longitude: number;
+    Description: string;
+    RackType: string;
+    RackCount: number;
+    ShelterIndicator: "Y" | "N";
+  }) => {
     let objCoor: coordinate = {latitude: obj.Latitude, longitude: obj.Longitude};
-    obj.Distance = getDistance(coor, objCoor);
+    
+    respData.push({
+      type: "Bicycle",
+      Name: obj.Description,
+      RackType: obj.RackType,
+      RackCount: obj.RackCount,
+      ShelterIndicator: obj.ShelterIndicator,
+      Distance: getDistance(coor, objCoor),
+    });
   });
   
-  let parkingDetails: GetBicycleParkingType = result.find((obj: GetBicycleParkingType) => (
-    obj.Description.toLowerCase() === name.toLowerCase()
+  let parkingDetails: GetBicycleParkingType;
+  const checker: any = respData.find((obj: GetBicycleParkingType) => (
+    obj.Name.toLowerCase() === name.toLowerCase()
   ));
-  console.log(parkingDetails)
+
+  if (checker === undefined) {
+    return res.status(404).json({
+      status : 0,
+      message : "Bike park station not found!"
+    });
+  }
+  else {
+    parkingDetails = checker;
+  }
 
   res.status(200).json({
     status : 1,
