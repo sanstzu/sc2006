@@ -4,7 +4,7 @@ import parkingRoutes from "./routes/parking";
 import { initializeConnection } from "./services/database";
 
 const app = express();
-const port = 8080;
+const port = process.env.API_PORT;
 
 app.use(express.json());
 
