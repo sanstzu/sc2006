@@ -14,7 +14,7 @@ RUN ["echo", "$ENVIRONMENT"]
 
 CMD if [ "$ENVIRONMENT" = "prod" ]; \
     then \
-        npm run prod; \
+        npm run build; npm run prod; \
     else \
         npm run dev; \
     fi
