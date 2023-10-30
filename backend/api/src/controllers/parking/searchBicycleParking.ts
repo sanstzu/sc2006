@@ -26,24 +26,42 @@ async function searchBicycleParking(
 ) {
   try {
     let coor: coordinate;
-    if (req.body.latitude === undefined || req.body.longitude === undefined) {
+
+    if (req.query.latitude === undefined || req.query.longitude === undefined) {
+      if (typeof req.query["place-id"] === "string") {
       const details: {
         name: string;
         address: string;
         longitude: number;
         latitude: number;
-      } = await fetchLocationDetails(req.body['place-id']);
+      } = await fetchLocationDetails(req.query["place-id"]);
       coor = {
         latitude: details.latitude,
         longitude: details.longitude,
       };
-    } else {
-      coor = {
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-      };
     }
-    
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
+    } else {
+
+      if (req.query.latitude !== undefined || req.query.longitude !== undefined) {
+        coor = {
+          latitude: parseFloat(req.query.latitude.toString()),
+          longitude: parseFloat(req.query.longitude.toString())
+        };
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
+    }
+
     const key = process.env.DB_UPDATER_LTA_KEY;
     const url =
       "http://datamall2.mytransport.sg/ltaodataservice/BicycleParkingv2";

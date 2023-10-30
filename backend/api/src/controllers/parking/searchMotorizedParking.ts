@@ -17,24 +17,41 @@ async function searchMotorizedParking(
       "vehicle-type": vehicleType,
       "price-start": priceStart,
       "price-end": priceEnd,
-    } = req.body;
+    } = req.query;
 
     let lat: number;
     let long: number;
 
-    if (req.body.latitude === undefined || req.body.longitude === undefined) {
-      const details: {
-        name: string;
-        address: string;
-        longitude: number;
-        latitude: number;
-      } = await fetchLocationDetails(req.body["place-id"]);
-      lat = details.latitude;
-      long = details.longitude;
+    if (req.query.latitude === undefined || req.query.longitude === undefined) {
+      if (typeof req.query["place-id"] === 'string') {
+        const details: {
+          name: string;
+          address: string;
+          longitude: number;
+          latitude: number;
+        } = await fetchLocationDetails(req.query["place-id"]);
+        lat = details.latitude;
+        long = details.longitude;
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+
+      }
 
     } else {
-      lat = req.body.latitude;
-      long = req.body.longitude;
+      if(req.query.latitude !== undefined || req.query.longitude !== undefined) {
+        lat = parseFloat(req.query.latitude.toString());
+        long = parseFloat(req.query.longitude.toString());
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
     }
 
     switch (order) {
@@ -49,8 +66,8 @@ async function searchMotorizedParking(
         break;
       default:
         return res.status(404).json({
-          status: 1,
-          message: "Invalid request body!",
+          status: 0,
+          message: "Invalid request query!",
         });
     }
     const [rows, fields]: [object[], object] = await query(
