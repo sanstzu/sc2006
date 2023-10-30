@@ -2,10 +2,10 @@ import mysql from "mysql2/promise";
 import { ObjectLiteralElementLike } from "typescript";
 
 const instance = mysql;
-var connection: mysql.Connection;
+var pool: mysql.Pool;
 
 export async function initializeConnection() {
-  connection = instance.createPool({
+  pool = instance.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -19,8 +19,10 @@ export async function initializeConnection() {
 }
 
 export async function query(query: string): Promise<[object[], object]> {
-  if (connection == null) throw new Error("Connection not initialized");
+  if (pool == null) throw console.error("Connection not initialized");
+  const connection = await pool.getConnection();
   const [rows, fields] = await connection.execute(query);
+  connection.release();
   if (Array.isArray(rows)) {
     return [rows, fields];
   } else {

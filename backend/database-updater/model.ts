@@ -1,10 +1,10 @@
 import mysql from "mysql2/promise";
 
 const instance = mysql;
-var connection: mysql.Connection;
+var pool: mysql.Pool;
 
 export async function initializeConnection() {
-  connection = instance.createPool({
+  pool = instance.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -18,7 +18,11 @@ export async function initializeConnection() {
 }
 
 export async function query(query: string) {
-  if (connection == null) throw console.error("Connection not initialized");
-  const [rows, fields] = await connection.execute(query);
+  var res;
+  if (pool == null) throw console.error("Connection not initialized");
+  const connection = await pool.getConnection();
+
+  const [rows, fields] = await connection.query(query);
+  connection.release();
   return [rows, fields];
 }
