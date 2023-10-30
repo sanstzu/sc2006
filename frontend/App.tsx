@@ -8,6 +8,7 @@ import ParkingInfo from "./pages/Result";
 import Filter from "./pages/Filter";
 import Display from "./pages/Display";
 import Search from "./pages/Search";
+import Results from "./pages/Results";
 
 // Update this
 export type RootStackParamList = {
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Search: undefined;
   Result: undefined;
   Filter: undefined;
+  Results: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,6 +53,11 @@ export default function App() {
             name="Filter"
             options={{ title: "Filters" }}
             component={Filter}
+          />
+          <Stack.Screen
+            name="Results"
+            options={{ title: "Results" }}
+            component={Results}
           />
         </Stack.Navigator>
       </NavigationContainer>

@@ -37,6 +37,13 @@ export default function Home({
       >
         Go to Result
       </Button>
+      <Button
+        icon="file-document-outline"
+        mode="contained"
+        onPress={() => navigation.navigate("Results")}
+      >
+        Go to Results
+      </Button>
     </View>
   );
 }
