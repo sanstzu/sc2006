@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ResponseType } from "@/types/response";
 import { query } from "@/services/database";
+import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchMotorizedParkingType = any;
 
@@ -8,34 +9,50 @@ async function searchMotorizedParking(
   req: Request,
   res: Response<ResponseType<SearchMotorizedParkingType[]>>
 ) {
-  let {
-    latitude: lat,
-    longitude: long,
-    day,
-    time,
-    order,
-    "vehicle-type": vehicleType,
-    "price-start": priceStart,
-    "price-end": priceEnd,
-  } = req.body;
-
-  switch (order) {
-    case "distance":
-      order = "D.Distance";
-      break;
-    case "price":
-      order = "PP.Price";
-      break;
-    case "availability":
-      order = "MP.AvailableLots DESC";
-      break;
-    default:
-      return res.status(404).json({
-        status: 1,
-        message: "Invalid request body!",
-      });
-  }
   try {
+    let {
+      day,
+      time,
+      order,
+      "vehicle-type": vehicleType,
+      "price-start": priceStart,
+      "price-end": priceEnd,
+    } = req.body;
+
+    let lat: number;
+    let long: number;
+
+    if (req.body.latitude === undefined || req.body.longitude === undefined) {
+      const details: {
+        name: string;
+        address: string;
+        longitude: number;
+        latitude: number;
+      } = await fetchLocationDetails(req.body["place-id"]);
+      lat = details.latitude;
+      long = details.longitude;
+
+    } else {
+      lat = req.body.latitude;
+      long = req.body.longitude;
+    }
+
+    switch (order) {
+      case "distance":
+        order = "D.Distance";
+        break;
+      case "price":
+        order = "PP.Price";
+        break;
+      case "availability":
+        order = "MP.AvailableLots DESC";
+        break;
+      default:
+        return res.status(404).json({
+          status: 1,
+          message: "Invalid request body!",
+        });
+    }
     const [rows, fields]: [object[], object] = await query(
       `WITH Dist AS (
       SELECT Coordinate,
