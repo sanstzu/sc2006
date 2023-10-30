@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View,SafeAreaView, BackHandler} from "react-native";
-import { SegmentedButtons } from 'react-native-paper';
+import { SegmentedButtons, ThemeProvider } from 'react-native-paper';
 import { Button } from 'react-native-paper'; 
 import { useState } from 'react';
 import Slider from '@react-native-community/slider';
@@ -38,7 +38,7 @@ export default function Filter( {navigation} ) {
         ]}
       />
       
-      <Text style={ [styles.header2, {color: (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }>Price</Text>
+      <Text style={ [styles.header2, {color:(filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }>Price</Text>
       <Slider
       style={styles.slider} 
       thumbTintColor= "lightskyblue"
@@ -49,34 +49,35 @@ export default function Filter( {navigation} ) {
       step={0.5}
       minimumTrackTintColor="#00BFFF"
       maximumTrackTintColor="#FFFFFF"
-      disabled = { (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? true : false} 
+      disabled = {(filterValue2 == 'Bicycle') ? true : false} 
 
       />
-      <Text  style={ [styles.price, {color: (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }
+      <Text  style={ [styles.price, {color: (filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }
       
       > ${sliderState.toPrecision(3)}  </Text>
       
       <Text style={styles.header3}>Vehicle</Text>
 
-      <SegmentedButtons style={styles.segmentedbuttons2}
+      <SegmentedButtons style={ styles.segmentedbuttons2 }
       value={filterValue2}
       onValueChange={setFilterValue2}
+
         buttons={[
           {
             value: 'Bicycle',
-            label: 'Bicycle',
+            label: 'Bicycle', 
           },
           {
             value: 'Car',
             label: 'Car',
           },
           {
-            value: 'Bike',
-            label: 'Bike' 
+            value: 'Motorcycle',
+            label: 'Motorcycle', 
           },
           { 
-            value: 'Truck',
-            label: 'Truck' 
+            value: 'Heavy Vehicle',
+            label: 'Heavy Vehicle' 
           },
         ]}
       />
@@ -93,7 +94,7 @@ export default function Filter( {navigation} ) {
   style={styles.applybutton}
   buttonColor = 'lightskyblue' 
   textColor= 'black'
-  onPress={() => navigation.navigate('Display')}>
+  onPress={() => navigation.goBack()}>
   Apply
   </Button>
 
