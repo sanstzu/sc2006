@@ -6,12 +6,15 @@ ENV ENVIRONMENT=$ENVIRONMENT
 
 WORKDIR /var/www/db-updater
 
-COPY [".", "./"]r
+COPY [".", "./"]
 
 RUN ["npm", "install"]
 
-RUN ["npm", "run", "build"]
-
+RUN if [ "$ENVIRONMENT" = "prod" ]; \
+    then \
+        npm run build; \
+    fi
+    
 CMD if [ "$ENVIRONMENT" = "prod" ]; \
     then \
         npm run prod; \
