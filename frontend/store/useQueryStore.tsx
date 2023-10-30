@@ -54,6 +54,6 @@ const filterStore = (
   },
 });
 
-const useParkingStore = createSelectorHooks(create<FilterStore>(filterStore));
+const useQueryStore = createSelectorHooks(create<FilterStore>(filterStore));
 
-export default useParkingStore;
+export default useQueryStore;
