@@ -6,6 +6,8 @@ import { getDistance } from "geolib";
 type GetBicycleParkingType = {
   type: "Bicycle";
   Name: string;
+  Latitude: number;
+  Longitude: number;
   RackType: string;
   RackCount: number;
   ShelterIndicator: "Y" | "N";
@@ -75,6 +77,8 @@ async function fetchBicycleParking(
       parkingDetails = {
         type: "Bicycle",
         Name: checker.Description,
+        Latitude: checker.Latitude,
+        Longitude: checker.Longitude,
         RackType: checker.RackType,
         RackCount: checker.RackCount,
         ShelterIndicator: checker.ShelterIndicator,
