@@ -49,7 +49,7 @@ export default function App() {
           />
           <Stack.Screen
             name="Filter"
-            options={{ title: "Filter Page" }}
+            options={{ title: "Filters" }}
             component={Filter}
           />
         </Stack.Navigator>
