@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prod": "node ./dist/index.js",
     "dev": "nodemon --legacy-watch -r tsconfig-paths/register",
-    "build": "npx tsc && npx tsc-alias"
+    "build": "tsc && tsc-alias"
   },
   "author": "",
   "license": "ISC",
