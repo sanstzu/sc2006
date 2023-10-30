@@ -6,13 +6,18 @@ ENV ENVIRONMENT=$ENVIRONMENT
 
 WORKDIR /var/www/db-updater
 
-COPY ["package.json", "package-lock.json", "./"]r
+COPY [".", "./"]
 
 RUN ["npm", "install"]
 
+RUN if [ "$ENVIRONMENT" = "prod" ]; \
+    then \
+        npm run build; \
+    fi
+    
 CMD if [ "$ENVIRONMENT" = "prod" ]; \
     then \
-        npm run build; npm run prod; \
+        npm run prod; \
     else \
         npm start; \
     fi
