@@ -28,7 +28,7 @@ async function searchPlace(
   res: Response<ResponseType<SearchPlaceType[]>>
 ) {
   try {
-    const searchInput = req.body.input;
+    const searchInput = req.query.input;
     const url = "https://maps.googleapis.com/maps/api/place/autocomplete/json?";
     const resp = await axios.get(url, {
       headers: {},

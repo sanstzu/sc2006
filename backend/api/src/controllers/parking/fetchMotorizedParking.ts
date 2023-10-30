@@ -8,9 +8,9 @@ async function fetchMotorizedParking(
   req: Request,
   res: Response<ResponseType<GetMotorizedParkingType>>
 ) {
+  const { latitude: lat, longitude: long } = req.query;
   const id = req.params.id;
-  const { latitude: lat, longitude: long } = req.body;
-
+  
   try {
     const [rows, fields]: [object[], object] = await query(
       `SELECT 
