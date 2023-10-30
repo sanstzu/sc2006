@@ -5,8 +5,9 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prod": "ts-node -r tsconfig-paths/register src/index.ts",
-    "dev": "nodemon --legacy-watch -r tsconfig-paths/register"
+    "prod": "node ./dist/index.js",
+    "dev": "nodemon --legacy-watch -r tsconfig-paths/register",
+    "build-prod": "npx tsc && npx tsc-alias"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
     "@types/express": "^4.17.19",
     "@types/node": "^20.8.5",
     "nodemon": "^3.0.1",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.2.2"
   }
 }
