@@ -45,31 +45,35 @@ function ResponseToQuery(response: CarPark[]) {
 }
 
 export default async function updateAvailability() {
-  let arr: CarPark[] = [];
+  try {
+    let arr: CarPark[] = [];
 
-  do {
-    const resp = await getParkingLots(arr.length);
-    if (resp.length == 0) break;
-    arr = arr.concat(resp);
-  } while (true);
+    do {
+      const resp = await getParkingLots(arr.length);
+      if (resp.length == 0) break;
+      arr = arr.concat(resp);
+    } while (true);
 
-  const initialSize = arr.length;
+    const initialSize = arr.length;
 
-  arr.filter((x) => {
-    const isValidLotType =
-      x.LotType == "C" || x.LotType == "Y" || x.LotType == "H";
-    const isValidAgency =
-      x.Agency == "HDB" || x.Agency == "URA" || x.Agency == "LTA";
+    arr.filter((x) => {
+      const isValidLotType =
+        x.LotType == "C" || x.LotType == "Y" || x.LotType == "H";
+      const isValidAgency =
+        x.Agency == "HDB" || x.Agency == "URA" || x.Agency == "LTA";
 
-    return isValidLotType && isValidAgency;
-  });
+      return isValidLotType && isValidAgency;
+    });
 
-  const querytxt = ResponseToQuery(arr);
-  await query(querytxt);
+    const querytxt = ResponseToQuery(arr);
+    await query(querytxt);
 
-  console.log(
-    `${new Date().toISOString()} Updated database with ${
-      arr.length
-    } entries and ${initialSize - arr.length} invalid entries.`
-  );
+    console.log(
+      `${new Date().toISOString()} Updated database with ${
+        arr.length
+      } entries and ${initialSize - arr.length} invalid entries.`
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
