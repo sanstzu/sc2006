@@ -6,16 +6,17 @@ export type Price = {
 };
 
 export interface Park {
-  type: "Motorized" | "Bicycle";
+  type: "Car" | "Motor" | "Heavy" | "Bicycle";
   coordinate: {
     latitude: number;
     longitude: number;
   };
   name: string; // Development in motorized, Description in bicycle
+  distance?: number; // in meters
 }
 
 export interface MotorizedPark extends Park {
-  type: "Motorized";
+  type: "Car" | "Motor" | "Heavy";
   availableLots: number;
 }
 
@@ -25,7 +26,9 @@ export interface MotorizedParkWithPrice extends MotorizedPark {
 
 export interface BicyclePark extends Park {
   type: "Bicycle";
+  Name: string;
   rackType: string;
   rackCount: number;
   shelterIndicator: "Y" | "N"; // has shelter or not
+  distance?: number; // in meters
 }
