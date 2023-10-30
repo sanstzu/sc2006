@@ -3,6 +3,7 @@ import { SegmentedButtons } from 'react-native-paper';
 import { Button } from 'react-native-paper'; 
 import { useState } from 'react';
 import Slider from '@react-native-community/slider';
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 export const name = "FilterPage";
 
@@ -14,7 +15,6 @@ export default function Filter( {navigation} ) {
   const [filterValue1, setFilterValue1] = useState('Distance')
   const [filterValue2, setFilterValue2] = useState('Car')
   const [sliderState, setSliderState] = useState<number>(0); 
-  const [sliderDisable, setSliderDisable] = useState(false); 
 
   return (
     <View style={styles.page}>
@@ -38,8 +38,7 @@ export default function Filter( {navigation} ) {
         ]}
       />
       
-      
-      <Text style={styles.header2}>Price</Text>
+      <Text style={ [styles.header2, {color: (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }>Price</Text>
       <Slider
       style={styles.slider} 
       thumbTintColor= "lightskyblue"
@@ -50,9 +49,12 @@ export default function Filter( {navigation} ) {
       step={0.5}
       minimumTrackTintColor="#00BFFF"
       maximumTrackTintColor="#FFFFFF"
+      disabled = { (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? true : false} 
+
       />
-      <Text
-      style={styles.price}>${sliderState.toPrecision(3)} </Text>
+      <Text  style={ [styles.price, {color: (filterValue2 == 'Bike') || (filterValue2 == 'Bicycle') ? 'ghostwhite' : 'black'} ] }
+      
+      > ${sliderState.toPrecision(3)}  </Text>
       
       <Text style={styles.header3}>Vehicle</Text>
 
@@ -102,12 +104,6 @@ export default function Filter( {navigation} ) {
     
     
   );
-}
-
-function helper(filterValue2: string, sliderDisable: boolean){
-  if(filterValue2='Bike' || 'Bicycle'){
-    sliderDisable = true; 
-  }
 }
 
 const styles = StyleSheet.create({
@@ -178,10 +174,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 200,
     height: 40,
-    top: 250,
+    top: 250, 
   },
   price:{
     position: 'absolute',
-    top: 290, 
-  }
-});
+    top: 290,   
+  },
+} )
