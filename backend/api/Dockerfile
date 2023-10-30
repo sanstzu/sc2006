@@ -10,7 +10,10 @@ COPY [".", "./"]
 
 RUN ["npm", "install"]
 
-RUN ["npm", "run", "build"]
+RUN if [ "$ENVIRONMENT" = "prod" ]; \
+    then \
+        npm run build;  \
+    fi
 
 RUN ["echo", "$ENVIRONMENT"]
 
