@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node --loader ts-node/esm index.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc && npx tsc-alias",
     "prod": "node ./dist/index.js"
   },
   "keywords": [],
