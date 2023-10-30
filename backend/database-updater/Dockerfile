@@ -1,5 +1,9 @@
 FROM node:18.18.0-alpine
 
+ARG ENVIRONMENT
+
+ENV ENVIRONMENT=$ENVIRONMENT
+
 WORKDIR /var/www/db-updater
 
 COPY ["package.json", "package-lock.json", "./"]r
