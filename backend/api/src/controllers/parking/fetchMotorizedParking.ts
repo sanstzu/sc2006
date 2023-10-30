@@ -9,13 +9,11 @@ async function fetchMotorizedParking(
   res: Response<ResponseType<GetMotorizedParkingType>>
 ) {
   const id = req.params.id;
-  const {
-    latitude: lat,
-    longitude: long,
-  } = req.body;
+  const { latitude: lat, longitude: long } = req.body;
 
-  const [rows, fields]: [object[], object] = await query(
-    `SELECT 
+  try {
+    const [rows, fields]: [object[], object] = await query(
+      `SELECT 
     MP.Development AS CarparkName,
     MP.AvailableLots,
     MP.LotType,
@@ -34,47 +32,53 @@ async function fetchMotorizedParking(
     JOIN ParkingPrice AS PP
     ON MP.CarParkID = PP.CarParkID
     WHERE MP.CarParkID = ${id};`
-  );
+    );
 
-  let primary: {
-    CarparkName?: string, 
-    AvailableLots?: number
-    LotType?: string
-    Latitude?: number
-    Longitude?: number
-    Distance?: number
-  } = rows[0];
-  
-  if (primary.LotType === 'C') primary.LotType = 'Car';
-  else if (primary.LotType === 'H') primary.LotType = 'Heavy';
-  else if (primary.LotType === 'Y') primary.LotType = 'Motor';
+    let primary: {
+      CarparkName?: string;
+      AvailableLots?: number;
+      LotType?: string;
+      Latitude?: number;
+      Longitude?: number;
+      Distance?: number;
+    } = rows[0];
 
-  let respData: GetMotorizedParkingType = {
-    'type': primary.LotType,
-    'name': primary.CarparkName,
-    'availableLots': primary.AvailableLots,
-    'coordinate': {
-      'latitude': primary.Latitude,
-      'longitude': primary.Longitude
-    },
-    'distance': primary.Distance,
-    'prices': []
-  };
+    if (primary.LotType === "C") primary.LotType = "Car";
+    else if (primary.LotType === "H") primary.LotType = "Heavy";
+    else if (primary.LotType === "Y") primary.LotType = "Motor";
 
-  rows.forEach((obj: GetMotorizedParkingType) => {
-    respData.prices.push({
-      'startTime': obj.StartTime,
-      'endTime': obj.EndTime,
-      'day': obj.Day,
-      'price': obj.Price
+    let respData: GetMotorizedParkingType = {
+      type: primary.LotType,
+      name: primary.CarparkName,
+      availableLots: primary.AvailableLots,
+      coordinate: {
+        latitude: primary.Latitude,
+        longitude: primary.Longitude,
+      },
+      distance: primary.Distance,
+      prices: [],
+    };
+
+    rows.forEach((obj: GetMotorizedParkingType) => {
+      respData.prices.push({
+        startTime: obj.StartTime,
+        endTime: obj.EndTime,
+        day: obj.Day,
+        price: obj.Price,
+      });
     });
-  });
 
-  res.status(200).json({
-    status: 1,
-    message: "success",
-    data : respData
-  });
+    res.status(200).json({
+      status: 1,
+      message: "success",
+      data: respData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 0,
+      message: "Internal server error",
+    });
+  }
 }
 
 export default fetchMotorizedParking;

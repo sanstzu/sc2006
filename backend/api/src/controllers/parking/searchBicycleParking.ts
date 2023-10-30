@@ -25,54 +25,68 @@ async function searchBicycleParking(
     latitude: req.body.latitude,
     longitude: req.body.longitude,
   };
+  try {
+    const key = process.env.DB_UPDATER_LTA_KEY;
+    const url =
+      "http://datamall2.mytransport.sg/ltaodataservice/BicycleParkingv2";
 
-  const key = process.env.DB_UPDATER_LTA_KEY;
-  const url =
-    "http://datamall2.mytransport.sg/ltaodataservice/BicycleParkingv2";
-
-  const resp = await axios.get(url, {
-    headers: {
-      accountKey: key,
-    },
-    params: {
-      Lat: req.body.latitude,
-      Long: req.body.longitude,
-      Dist: 1,
-    },
-  });
-
-  let result = resp.data.value;
-  let respData: SearchBicycleParkingType[] = [];
-
-  result.forEach((obj: {
-    Latitude: number;
-    Longitude: number;
-    Description: string;
-    RackType: string;
-    RackCount: number;
-    ShelterIndicator: "Y" | "N";
-  }) => {
-    let objCoor: coordinate = {latitude: obj.Latitude, longitude: obj.Longitude};
-    
-    respData.push({
-      type: "Bicycle",
-      Name: obj.Description,
-      RackType: obj.RackType,
-      RackCount: obj.RackCount,
-      ShelterIndicator: obj.ShelterIndicator,
-      Distance: getDistance(coor, objCoor),
+    const resp = await axios.get(url, {
+      headers: {
+        accountKey: key,
+      },
+      params: {
+        Lat: req.body.latitude,
+        Long: req.body.longitude,
+        Dist: 1,
+      },
     });
-  });
 
+    let result = resp.data.value;
+    let respData: SearchBicycleParkingType[] = [];
 
-  let sortedResult: SearchBicycleParkingType[] = respData.sort((obj1: SearchBicycleParkingType, obj2: SearchBicycleParkingType) => {
-    return obj1.Distance - obj2.Distance;
-  });
+    result.forEach(
+      (obj: {
+        Latitude: number;
+        Longitude: number;
+        Description: string;
+        RackType: string;
+        RackCount: number;
+        ShelterIndicator: "Y" | "N";
+      }) => {
+        let objCoor: coordinate = {
+          latitude: obj.Latitude,
+          longitude: obj.Longitude,
+        };
 
-  res.status(200).json({
-    status: 1,
-    message: "success",
-    data: sortedResult,
-  });
+        respData.push({
+          type: "Bicycle",
+          Name: obj.Description,
+          RackType: obj.RackType,
+          RackCount: obj.RackCount,
+          ShelterIndicator: obj.ShelterIndicator,
+          Distance: getDistance(coor, objCoor),
+        });
+      }
+    );
+
+    let sortedResult: SearchBicycleParkingType[] = respData
+      .sort(
+        (obj1: SearchBicycleParkingType, obj2: SearchBicycleParkingType) => {
+          return obj1.Distance - obj2.Distance;
+        }
+      )
+      .slice(0, 10);
+
+    res.status(200).json({
+      status: 1,
+      message: "success",
+      data: sortedResult,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 0,
+      message: "Internal server error",
+    });
+  }
 }
 export default searchBicycleParking;
