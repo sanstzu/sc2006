@@ -1,9 +1,9 @@
 import { Button, StyleSheet, Text, View } from "react-native";
 
-export const name = "ParkingInfoPage";
+export const name = "ResultPage";
 
 export const options = {
-  title: "ParkingInfo",
+  title: "Result",
 };
 
 export default function ParkingInfo() {

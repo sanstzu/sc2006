@@ -1,6 +1,8 @@
 import { Button, StyleSheet, Text, View } from "react-native";
+import useParkingStore from "../../store/useParkingStore";
 
 export default function Display() {
+  const test = useParkingStore();
   return (
     <View style={styles.page}>
       <Text>Hello world!</Text>
