@@ -7,14 +7,12 @@ import HomeScreen from "./pages/Home";
 import ParkingInfo from "./pages/Result";
 import Filter from "./pages/Filter";
 import Display from "./pages/Display";
-import Search from "./pages/Search";
 import Results from "./pages/Results";
 
 // Update this
 export type RootStackParamList = {
   Home: undefined;
   Display: undefined;
-  Search: undefined;
   Result: undefined;
   Filter: undefined;
   Results: undefined;
@@ -38,11 +36,6 @@ export default function App() {
             name="Display"
             options={{ title: "Display Map Screen" }}
             component={Display}
-          />
-          <Stack.Screen
-            name="Search"
-            options={{ title: "Search Page Screen" }}
-            component={Search}
           />
           <Stack.Screen
             name="Result"
