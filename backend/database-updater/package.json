@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node --loader ts-node/esm index.ts",
-    "testfile": "node --loader ts-node/esm test.ts"
+    "build": "tsc && npx tsc-alias",
+    "prod": "node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -15,5 +16,9 @@
     "mysql2": "^3.6.1",
     "svy21": "^1.0.0",
     "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "tsc-alias": "^1.8.8",
+    "typescript": "^5.2.2"
   }
 }

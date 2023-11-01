@@ -24,39 +24,37 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function App() {
   return (
     <PaperProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen
-              name="Home"
-              options={{
-                title: "Home Screen",
-              }}
-              component={HomeScreen}
-            ></Stack.Screen>
-            <Stack.Screen
-              name="Display"
-              options={{ title: "Display Map Screen" }}
-              component={Display}
-            />
-            <Stack.Screen
-              name="Search"
-              options={{ title: "Search Page Screen" }}
-              component={Search}
-            />
-            <Stack.Screen
-              name="Result"
-              options={{ title: "Result Screen" }}
-              component={ParkingInfo}
-            />
-            <Stack.Screen
-              name="Filter"
-              options={{ title: "Filter Page" }}
-              component={Filter}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </GestureHandlerRootView>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            options={{
+              title: "Home Screen",
+            }}
+            component={HomeScreen}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="Display"
+            options={{ title: "Display Map Screen" }}
+            component={Display}
+          />
+          <Stack.Screen
+            name="Search"
+            options={{ title: "Search Page Screen" }}
+            component={Search}
+          />
+          <Stack.Screen
+            name="Result"
+            options={{ title: "Result Screen" }}
+            component={ParkingInfo}
+          />
+          <Stack.Screen
+            name="Filter"
+            options={{ title: "Filters" }}
+            component={Filter}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </PaperProvider>
   );
 }
