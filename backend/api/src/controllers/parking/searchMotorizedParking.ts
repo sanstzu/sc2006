@@ -23,7 +23,7 @@ async function searchMotorizedParking(
     let long: number;
 
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
-      if (typeof req.query["place-id"] === 'string') {
+      if (typeof req.query["place-id"] === "string") {
         const details: {
           name: string;
           address: string;
@@ -32,23 +32,22 @@ async function searchMotorizedParking(
         } = await fetchLocationDetails(req.query["place-id"]);
         lat = details.latitude;
         long = details.longitude;
-      }
-      else {
+      } else {
         return res.status(404).json({
-          status: 0,
+          status: 1,
           message: "Invalid request query!",
         });
-
       }
-
     } else {
-      if(req.query.latitude !== undefined || req.query.longitude !== undefined) {
+      if (
+        req.query.latitude !== undefined ||
+        req.query.longitude !== undefined
+      ) {
         lat = parseFloat(req.query.latitude.toString());
         long = parseFloat(req.query.longitude.toString());
-      }
-      else {
+      } else {
         return res.status(404).json({
-          status: 0,
+          status: 2,
           message: "Invalid request query!",
         });
       }
