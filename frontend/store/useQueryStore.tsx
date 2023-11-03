@@ -3,9 +3,9 @@ import { createSelectorHooks } from "auto-zustand-selectors-hook";
 import { BicyclePark, MotorizedPark, Park } from "../types/parking";
 import { produce } from "immer";
 
-type Vehicle = "Bicycle" | "Car" | "Motorcycle" | "Heavy Vehicle";
+export type Vehicle = "Bicycle" | "Car" | "Motorcycle" | "Heavy Vehicle";
 
-type Sort = "Distance" | "Price" | "Availability";
+export type Sort = "Distance" | "Price" | "Availability";
 
 type Coordinate = {
   longitude: number;
@@ -43,9 +43,11 @@ const filterStore = (
       })
     ),
   setSort: (sort: Sort) => {
+    set(
     produce<FilterStore>((state) => {
       state.sort = sort;
-    });
+    })
+    )
   },
   setCoordinate: (coord: Coordinate) => {
     produce<FilterStore>((state) => {
