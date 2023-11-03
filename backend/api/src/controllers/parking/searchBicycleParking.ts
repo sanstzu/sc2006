@@ -6,13 +6,12 @@ import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchBicycleParkingType = {
   type: "Bicycle";
-  Name: string;
-  Latitude: number;
-  Longitude: number;
-  RackType: string;
-  RackCount: number;
-  ShelterIndicator: "Y" | "N";
-  Distance: number;
+  name: string;
+  coordinate: coordinate;
+  rackType: string;
+  rackCount: number;
+  shelterIndicator: "Y" | "N";
+  distance: number;
 };
 
 type coordinate = {
@@ -96,13 +95,15 @@ async function searchBicycleParking(
 
         respData.push({
           type: "Bicycle",
-          Name: obj.Description,
-          Latitude: obj.Latitude,
-          Longitude: obj.Longitude,
-          RackType: obj.RackType,
-          RackCount: obj.RackCount,
-          ShelterIndicator: obj.ShelterIndicator,
-          Distance: getDistance(coor, objCoor),
+          name: obj.Description,
+          coordinate: {
+            latitude: obj.Latitude,
+            longitude: obj.Longitude,
+          },
+          rackType: obj.RackType,
+          rackCount: obj.RackCount,
+          shelterIndicator: obj.ShelterIndicator,
+          distance: getDistance(coor, objCoor),
         });
       }
     );
@@ -110,7 +111,7 @@ async function searchBicycleParking(
     let sortedResult: SearchBicycleParkingType[] = respData
       .sort(
         (obj1: SearchBicycleParkingType, obj2: SearchBicycleParkingType) => {
-          return obj1.Distance - obj2.Distance;
+          return obj1.distance - obj2.distance;
         }
       )
       .slice(0, 10);
