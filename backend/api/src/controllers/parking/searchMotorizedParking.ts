@@ -94,6 +94,7 @@ async function searchMotorizedParking(
     JOIN Dist AS D
     ON MP.CarParkID = PP.CarParkID
     AND D.Coordinate = MP.Coordinate
+    AND MP.LotType = PP.LotType
     WHERE PP.Day = '${day}'
     AND MP.LotType = '${vehicleType}'
     AND '${time}' <= PP.EndTime AND '${time}' >= PP.StartTime
