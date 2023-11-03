@@ -26,7 +26,7 @@ const [count, setCount] = useState(true);
             {                
                 flexDirection: 'column',
                 alignItems: 'center',
-                width: 'auto',
+                minWidth: '20%',
                 flex: 0,
             },
         ]}>

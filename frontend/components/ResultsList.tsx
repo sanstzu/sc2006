@@ -4,7 +4,12 @@ import ResultsButton from './ResultsButton';
 
 const screenWidth = Dimensions.get('window').width;
 
-type List = {
+export type List = {
+  id?: number;
+  coordinate?: {
+    latitude: number;
+    longitude: number;
+  };
   type: string;
   name: string;
   availableLots?: number;

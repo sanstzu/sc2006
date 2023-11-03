@@ -1,0 +1,32 @@
+{
+    "datas": {
+        "status": 1,
+        "message": "success",
+        "data": [
+            {
+                "type": "Car",
+                "id": "2",
+                "name": "Marina Square",
+                "availableLots": 1072,
+                "coordinate": {
+                    "latitude": 1.29115,
+                    "longitude": 103.85728
+                },
+                "distance": 276.5603314399335,
+                "price": "1.21"
+            },
+            {
+                "type": "Car",
+                "id": "50",
+                "name": "VivoCity P2",
+                "availableLots": 730,
+                "coordinate": {
+                    "latitude": 1.26426,
+                    "longitude": 103.82164
+                },
+                "distance": 4688.307212445935,
+                "price": "1.60"
+            }
+        ]
+    }
+}

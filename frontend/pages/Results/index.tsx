@@ -1,6 +1,8 @@
 import { Dimensions, Button, StyleSheet, Text, View } from "react-native";
 import { IconButton } from "react-native-paper";
 import ResultsList from "../../components/ResultsList";
+import React, { useState, useEffect } from 'react';
+import { useAxios } from '../../hooks/useAxios';
 
 export const name = "Results";
 
@@ -11,7 +13,20 @@ export const options = {
 const screenWidth = Dimensions.get('window').width;
 
 export default function Results() {
-  return (
+  const [data, setData] = useState(null);
+  const axios = useAxios();
+  useEffect (() => {
+    axios.get()
+      .then(function (response) {
+        console.log(process.env.API_BASE_URL);
+        setData(response.data["data"]);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
+  return (    
     <View style={styles.page}>
       <View style={[
         styles.container,
@@ -35,19 +50,13 @@ export default function Results() {
             <Text style={[styles.titleText]}>Parking Spaces</Text>
       </View>
       <View style={{flex: 1, paddingBottom: 25}}>
-        <ResultsList data={[
+        {/* <Text>Test</Text> */}
+        <ResultsList data={data} />
+        {/* <ResultsList data={[
           {type: "Bicycle", name: "Plaza Singapura", distance: 167.7334650825399},
           {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
           {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-          {type: "Car", name: "Plaza Singapura", address: "68 Orchard Rd", availableLots: 686, distance: 1678.7334650825399, price: "1.23"},
-        ]}/>
+        ]}/> */}
       </View>
     </View>
   );
