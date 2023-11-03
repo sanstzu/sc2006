@@ -225,7 +225,6 @@ export default function Display() {
                       width: 200,
                       zIndex: 90,
                     }}
-                    elevation={5}
                   >
                     <Card.Title title={park.name} />
                     <Card.Content
