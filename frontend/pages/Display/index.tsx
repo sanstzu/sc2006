@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Card, Text, Button } from "react-native-paper";
+import { Card, Text, Button, IconButton } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import BottomSheet from "../../components/BottomSheet";
 import BottomSheetElement from "@gorhom/bottom-sheet";
@@ -46,18 +46,26 @@ function getVehicleCode(vehicleType: string) {
   }
 }
 
-type MotorizedSearch = MotorizedPark & {
+interface MotorizedSearch extends MotorizedPark {
   price: string;
-};
+}
 
 export default function Display() {
   const isFocused = useIsFocused();
   const parking = useParkingStore.useParking();
   const vehicleType = useQueryStore.useVehicleType();
   const axios = useAxios();
+  const setParking = useParkingStore.useSetParking();
+  const removeParking = useParkingStore.useRemoveParking();
 
+  const [coordRange, setCoordRange] = useState<{
+    minLat: number;
+    maxLat: number;
+    minLng: number;
+    maxLng: number;
+    zoom?: number;
+  } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
 
   const handleSheetChanges = useCallback((index: number) => {
@@ -67,6 +75,11 @@ export default function Display() {
   const testRef = useRef(null);
 
   const mapRef = useRef<MapView>(null);
+
+  // Clears the parking store on each page load
+  useEffect(() => {
+    removeParking();
+  }, [isFocused]);
 
   // Retrieves the user current location
   useEffect(() => {
@@ -78,17 +91,6 @@ export default function Display() {
       }
 
       let locationTmp = await Location.getCurrentPositionAsync({});
-      if (!parking) {
-        mapRef?.current?.animateToRegion(
-          {
-            latitude: locationTmp?.coords.latitude ?? 0,
-            longitude: locationTmp?.coords.longitude ?? 0,
-            longitudeDelta: 0.015,
-            latitudeDelta: 0.015,
-          },
-          0
-        );
-      }
 
       // Get current date
       const now = new Date();
@@ -126,6 +128,66 @@ export default function Display() {
     }
   }, [parking]);
 
+  // Calculates the minimum and maximum latitude and longitude of the nearby parking with the current locaiton of the user
+  useEffect(() => {
+    if (parking) {
+      // If use have selected parking location, then only displays the parking location
+      setCoordRange({
+        minLat: parking.coordinate.latitude,
+        minLng: parking.coordinate.longitude,
+        maxLat: parking.coordinate.latitude,
+        maxLng: parking.coordinate.longitude,
+      });
+    } else {
+      (async () => {
+        let locationTmp = await Location.getCurrentPositionAsync({});
+
+        let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
+        let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
+        let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
+        let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
+
+        nearbyPark.forEach((park) => {
+          minLat = Math.min(minLat, park.coordinate.latitude);
+          maxLat = Math.max(maxLat, park.coordinate.latitude);
+          minLng = Math.min(minLng, park.coordinate.longitude);
+          maxLng = Math.max(maxLng, park.coordinate.longitude);
+        });
+
+        if (nearbyPark.length === 0) {
+          setCoordRange(null);
+        } else {
+          setCoordRange({
+            minLat,
+            maxLat,
+            minLng,
+            maxLng,
+            zoom: undefined,
+          });
+        }
+      })();
+    }
+  }, [nearbyPark]);
+
+  // Animate to region where all parking are visible
+  useEffect(() => {
+    if (nearbyPark.length > 0 && coordRange) {
+      mapRef?.current?.animateToRegion(
+        {
+          latitude: (coordRange.minLat + coordRange.maxLat) / 2,
+          longitude: (coordRange.minLng + coordRange.maxLng) / 2,
+          latitudeDelta:
+            ((coordRange.maxLat - coordRange.minLat) * 1.2 + 0.005) *
+            (coordRange.zoom ?? 1),
+          longitudeDelta:
+            ((coordRange.maxLng - coordRange.minLng) * 1.2 + 0.005) *
+            (coordRange.zoom ?? 1),
+        },
+        500
+      );
+    }
+  }, [coordRange]);
+
   return (
     <View style={styles.page}>
       <MapView
@@ -136,41 +198,74 @@ export default function Display() {
         provider={PROVIDER_GOOGLE}
         ref={mapRef}
       >
-        {nearbyPark.map((park, idx) => {
-          return (
-            <Marker
-              key={idx}
-              title={park.name}
-              coordinate={{
-                longitude: park.coordinate.longitude,
-                latitude: park.coordinate.latitude,
-              }}
-              ref={idx === 0 ? testRef : null}
-            >
-              <Callout tooltip={true}>
-                <Card
-                  contentStyle={{
-                    width: 200,
+        {!parking ? (
+          nearbyPark.map((park, idx) => {
+            return (
+              <Marker
+                key={idx}
+                title={park.name}
+                coordinate={{
+                  longitude: park.coordinate.longitude,
+                  latitude: park.coordinate.latitude,
+                }}
+                ref={idx === 0 ? testRef : null}
+              >
+                <Callout
+                  tooltip={true}
+                  alphaHitTest={true}
+                  style={{
+                    zIndex: 100,
                   }}
-                  elevation={5}
+                  onPress={() => {
+                    setParking(park);
+                  }}
                 >
-                  <Card.Title title={park.name} />
-                  <Card.Content>
-                    <Text>Price: ${park.price}</Text>
-                    <Text>Available Lots: {park.availableLots}</Text>
-                  </Card.Content>
-                </Card>
-              </Callout>
-            </Marker>
-          );
-        })}
+                  <Card
+                    contentStyle={{
+                      width: 200,
+                      zIndex: 90,
+                    }}
+                    elevation={5}
+                  >
+                    <Card.Title title={park.name} />
+                    <Card.Content
+                      style={{
+                        display: "flex",
+                        width: "100%",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View>
+                        <Text>Price: ${park.price}</Text>
+                        <Text>Available Lots: {park.availableLots}</Text>
+                      </View>
+
+                      <IconButton icon="chevron-right" />
+                    </Card.Content>
+                  </Card>
+                </Callout>
+              </Marker>
+            );
+          })
+        ) : (
+          <Marker
+            title={parking.name}
+            coordinate={{
+              longitude: parking.coordinate.longitude,
+              latitude: parking.coordinate.latitude,
+            }}
+          ></Marker>
+        )}
       </MapView>
 
       {/* Bottom sheet */}
       <BottomSheet
         index={0}
         onChange={handleSheetChanges}
-        title="Parking Spaces Near Me"
+        title="Parking Details"
+        hideOpening={parking !== null}
       >
         {/* To be filled */}
       </BottomSheet>
