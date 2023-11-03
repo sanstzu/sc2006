@@ -23,16 +23,33 @@ async function fetchBicycleParking(
   req: Request,
   res: Response<ResponseType<GetBicycleParkingType>>
 ) {
+  let Qcoor: coordinate;
+  let coor: coordinate;
   const name: string = req.params.id;
-  const Qcoor: coordinate = {
-    latitude: req.body.Qlatitude,
-    longitude: req.body.Qlongitude,
-  };
-  const coor: coordinate = {
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-  };
-
+  if (req.query.Qlatitude !== undefined && req.query.Qlongitude !== undefined) {
+      Qcoor = {
+      latitude: parseFloat(req.query.Qlatitude.toString()),
+      longitude: parseFloat(req.query.Qlongitude.toString()),
+    };
+  } else {
+    return res.status(404).json({
+      status: 0,
+      message: "Invalid request query!",
+    });
+  }
+  if (req.query.latitude !== undefined && req.query.longitude !== undefined) {
+    coor = {
+      latitude: parseFloat(req.query.latitude.toString()),
+      longitude: parseFloat(req.query.longitude.toString()),
+    };
+  }
+  else {
+    return res.status(404).json({
+      status: 0,
+      message: "Invalid request query!",
+    });
+  }
+  
   try {
     const key = process.env.DB_UPDATER_LTA_KEY;
     const url =
@@ -43,8 +60,8 @@ async function fetchBicycleParking(
         accountKey: key,
       },
       params: {
-        Lat: req.body.latitude,
-        Long: req.body.longitude,
+        Lat: req.query.latitude,
+        Long: req.query.longitude,
         Dist: 1,
       },
     });
@@ -62,8 +79,8 @@ async function fetchBicycleParking(
         ShelterIndicator: "Y" | "N";
       }) =>
         obj.Description.toLowerCase() === name.toLowerCase() &&
-        obj.Latitude === Qcoor.latitude &&
-        obj.Longitude === Qcoor.longitude
+        (obj.Latitude - Qcoor.latitude) < 0.00000001 &&
+        (obj.Longitude - Qcoor.longitude) < 0.00000001
     );
 
     let parkingDetails: GetBicycleParkingType;
@@ -91,9 +108,7 @@ async function fetchBicycleParking(
       message: "success",
       data: parkingDetails,
     });
-  } 
-  
-  catch (error) {
+  } catch (error) {
     return res.status(500).json({
       status: 0,
       message: "Internal server error",

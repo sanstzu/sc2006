@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ResponseType } from "@/types/response";
 import { query } from "@/services/database";
+import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchMotorizedParkingType = any;
 
@@ -8,34 +9,67 @@ async function searchMotorizedParking(
   req: Request,
   res: Response<ResponseType<SearchMotorizedParkingType[]>>
 ) {
-  let {
-    latitude: lat,
-    longitude: long,
-    day,
-    time,
-    order,
-    "vehicle-type": vehicleType,
-    "price-start": priceStart,
-    "price-end": priceEnd,
-  } = req.body;
-
-  switch (order) {
-    case "distance":
-      order = "D.Distance";
-      break;
-    case "price":
-      order = "PP.Price";
-      break;
-    case "availability":
-      order = "MP.AvailableLots DESC";
-      break;
-    default:
-      return res.status(404).json({
-        status: 1,
-        message: "Invalid request body!",
-      });
-  }
   try {
+    let {
+      day,
+      time,
+      order,
+      "vehicle-type": vehicleType,
+      "price-start": priceStart,
+      "price-end": priceEnd,
+    } = req.query;
+
+    let lat: number;
+    let long: number;
+
+    if (req.query.latitude === undefined || req.query.longitude === undefined) {
+      if (typeof req.query["place-id"] === 'string') {
+        const details: {
+          name: string;
+          address: string;
+          longitude: number;
+          latitude: number;
+        } = await fetchLocationDetails(req.query["place-id"]);
+        lat = details.latitude;
+        long = details.longitude;
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+
+      }
+
+    } else {
+      if(req.query.latitude !== undefined || req.query.longitude !== undefined) {
+        lat = parseFloat(req.query.latitude.toString());
+        long = parseFloat(req.query.longitude.toString());
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
+    }
+
+    switch (order) {
+      case "distance":
+        order = "D.Distance";
+        break;
+      case "price":
+        order = "PP.Price";
+        break;
+      case "availability":
+        order = "MP.AvailableLots DESC";
+        break;
+      default:
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+    }
     const [rows, fields]: [object[], object] = await query(
       `WITH Dist AS (
       SELECT Coordinate,

@@ -6,7 +6,7 @@
             {
                 "type": "Car",
                 "id": "2",
-                "name": "Marina Square",
+                "name": "Marin Square",
                 "availableLots": 1072,
                 "coordinate": {
                     "latitude": 1.29115,
@@ -26,6 +26,16 @@
                 },
                 "distance": 4688.307212445935,
                 "price": "1.60"
+            },
+            {
+                "type": "Bicycle",
+                "name": "THE ESPLANADE EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+                "Latitude": 1.2890868949649543,
+                "Longitude": 103.85487562287899,
+                "RackType": "MCCY_RACKS",
+                "RackCount": 10,
+                "ShelterIndicator": "N",
+                "distance": 90
             }
         ]
     }

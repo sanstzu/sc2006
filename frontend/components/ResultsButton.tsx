@@ -4,6 +4,7 @@ import { IconButton } from "react-native-paper";
 
 const mediumAvailability = 25;
 const highAvailability = 100;
+const NUM_OF_LINES = 2;
 
 type ResultsButtonProps = {
     parkingId?: string;
@@ -26,7 +27,7 @@ const [count, setCount] = useState(true);
             {                
                 flexDirection: 'column',
                 alignItems: 'center',
-                minWidth: '20%',
+                minWidth: 60,
                 flex: 0,
             },
         ]}>
@@ -46,7 +47,7 @@ const [count, setCount] = useState(true);
             </View>
         </View>
         <View style={[
-            styles.container,
+            styles.leftContainer,
             {                
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -55,8 +56,7 @@ const [count, setCount] = useState(true);
             },
         ]}>
             <View>
-                <Text style={[styles.text, styles.carParkText, {marginBottom: 4}]}>{props.name}</Text>
-                {props.address && <Text style={[styles.text, styles.addressText]}>{props.address}</Text>}
+                <Text numberOfLines={NUM_OF_LINES} style={[styles.text, styles.carParkText, {marginBottom: 4}]}>{props.name}</Text>
             </View>
             <View style={[
                 styles.container,
@@ -72,7 +72,7 @@ const [count, setCount] = useState(true);
                     size={props.type === 'Car' ? 35 : 40}
                     style={[styles.icon]}
                 />
-                {props.rate && <Text style={[styles.text, styles.numberText]}>$ {props.rate}</Text>}
+                {props.rate && <Text style={[styles.text, styles.numberText]}>$ {props.rate.toFixed(2)}</Text>}
             </View>
         </View>
     </Pressable>
@@ -109,17 +109,23 @@ const styles = StyleSheet.create({
         color: "#64748B",
     },
     carParkText: {
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: "500",
         color: "#000",
+        maxWidth: '85%',
+        minWidth: '80%',
+        width: '80%',
     },
     addressText:{
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: "400",
         color: "#1E293B",
     },
     icon:{
         margin: 0,
         padding: 0,
-    }
+    },
+    leftContainer: {
+        display: "flex",
+    },
 });

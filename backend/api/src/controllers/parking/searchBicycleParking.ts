@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ResponseType } from "@/types/response";
 import axios from "axios";
 import { getDistance } from "geolib";
+import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchBicycleParkingType = {
   type: "Bicycle";
@@ -23,11 +24,44 @@ async function searchBicycleParking(
   req: Request,
   res: Response<ResponseType<SearchBicycleParkingType[]>>
 ) {
-  const coor: coordinate = {
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-  };
   try {
+    let coor: coordinate;
+
+    if (req.query.latitude === undefined || req.query.longitude === undefined) {
+      if (typeof req.query["place-id"] === "string") {
+      const details: {
+        name: string;
+        address: string;
+        longitude: number;
+        latitude: number;
+      } = await fetchLocationDetails(req.query["place-id"]);
+      coor = {
+        latitude: details.latitude,
+        longitude: details.longitude,
+      };
+    }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
+    } else {
+
+      if (req.query.latitude !== undefined || req.query.longitude !== undefined) {
+        coor = {
+          latitude: parseFloat(req.query.latitude.toString()),
+          longitude: parseFloat(req.query.longitude.toString())
+        };
+      }
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid request query!",
+        });
+      }
+    }
+
     const key = process.env.DB_UPDATER_LTA_KEY;
     const url =
       "http://datamall2.mytransport.sg/ltaodataservice/BicycleParkingv2";
@@ -37,8 +71,8 @@ async function searchBicycleParking(
         accountKey: key,
       },
       params: {
-        Lat: req.body.latitude,
-        Long: req.body.longitude,
+        Lat: coor.latitude,
+        Long: coor.longitude,
         Dist: 1,
       },
     });
