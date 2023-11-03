@@ -15,9 +15,10 @@ import {
 import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
 import useParkingQueryStore from "../store/useParkingQueryStore";
+import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchHeaderProps {
-  navigation: NativeStackNavigationProp<RootStackParamList>;
+  navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
 }
 
 interface SearchQuery {
@@ -57,6 +58,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   };
 
   const [searchText, setSearchText] = useState("");
+  // const debounceSearchText = useDebounce(searchText, DEBOUNCE_DELAY;
   const [searchState, setSearchState] = useState<SearchState>(
     SearchState.Empty
   );
@@ -68,12 +70,16 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const queryStore = useQueryStore();
   const setParkingQuery = useParkingQueryStore((state) => state.setQuery);
 
+  // useEffect(() => {
+  //   handleSearchChange(debounceSearchText);
+  // }, [debounceSearchText]);
+
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     try {
       switch (state) {
         case SearchState.SearchingPlace:
           const { data: responseData } = await parkingAxios.get(
-            "maps/places/search",
+            "/maps/places/search",
             { params: { input: query.name } }
           );
           setSearchResults(responseData.data);
@@ -90,7 +96,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 `${TIMEZONEDB_API_BASE_URL}/get-time-zone`,
                 {
                   params: {
-                    key: process.env.TIMEZONEDB_API_KEY,
+                    key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
                     format: "json",
                     by: "zone",
                     zone: "SG",
@@ -109,7 +115,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
               "/parking/motorized/search",
               {
                 params: {
-                  place_id: query?.place_id,
+                  "place-id": query?.place_id,
                   day: dayMap[timeData.getDay()],
                   time: getHHMMSSFormat(timeData),
                   // get default filters from global store
@@ -120,7 +126,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 },
               }
             );
-
+            console.log({ responseData });
             rawParkingData = responseData.data;
           } else {
             const { data: responseData } = await parkingAxios.get(
@@ -142,7 +148,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                   latitude: entry.coordinate.latitude,
                   longitude: entry.coordinate.longitude,
                 },
-                price: entry.distance ? entry.distance.toString() : "NA",
+                price: entry.price ? entry.price.toString() : "NA",
               };
 
               if (entry.type !== "Bicycle") {
@@ -153,7 +159,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
               return listItem;
             }
           );
-
+          console.log({ formattedData });
           setSearchResults(formattedData);
           break;
 
@@ -165,27 +171,27 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
-  const handleSearchChange = (text: string) => {
+  const handleSearchChange = async (text: string) => {
     setSearchText(text);
     let newSearchState = SearchState.Empty;
 
     if (text.trim() !== "") {
       newSearchState = SearchState.SearchingPlace;
       const query: SearchQuery = { name: text };
-      getSearchResults(newSearchState, query);
+      await getSearchResults(newSearchState, query);
     }
 
     setSearchState(newSearchState);
   };
 
-  const handleSelectPlace = (place: Place) => {
+  const handleSelectPlace = async (place: Place) => {
     const newSearchState = SearchState.SearchingParking;
     const query: SearchQuery = {
       name: place.name,
       place_id: place.place_id,
     };
     setSearchText(query.name);
-    getSearchResults(newSearchState, query);
+    await getSearchResults(newSearchState, query);
     setSearchState(newSearchState);
   };
 
@@ -205,17 +211,17 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   };
 
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
         <Searchbar
           placeholder="Search"
           value={searchText}
+          // onChangeText={(text) => setSearchText(text)}
           onChangeText={handleSearchChange}
           inputStyle={{ color: "black" }}
           theme={colors.searchbar}
           style={styles.searchbar}
         />
-        {/* <View style={styles.buttonContainer}> */}
         <IconButton
           icon="tune"
           mode="contained-tonal"
@@ -223,9 +229,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
           theme={colors.button}
           style={styles.button}
         />
-        {/* </View> */}
       </View>
-      <ScrollView>
+      <ScrollView style={styles.resultBody}>
         {searchState === SearchState.SearchingPlace && (
           <PlacesList
             places={searchResults as Array<Place>}
@@ -258,23 +263,39 @@ function getHHMMSSFormat(date: Date): string {
 
 const styles = StyleSheet.create({
   container: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
     flex: 1,
-    flexGrow: 1,
+    top: 0,
+    left: 0,
+    paddingTop: 60,
+  },
+  header: {
+    position: "absolute",
+    top: 0,
+    width: "100%",
+    flex: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
+    zIndex: 2,
+    backgroundColor: "#F2F2F2",
+  },
+  resultBody: {
+    flex: 1,
   },
   searchbar: {
     flexGrow: 1,
-    // maxWidth: 360,
+    maxWidth: 360,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#CBD5E1",
   },
   button: {
     height: "100%",
-    width: 56,
+    width: 58,
     aspectRatio: 1 / 1,
     margin: 0,
     borderRadius: 12,
@@ -284,6 +305,8 @@ const styles = StyleSheet.create({
 });
 
 const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
+/** delay of user input processing in ms */
+const DEBOUNCE_DELAY = 400;
 
 const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 

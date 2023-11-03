@@ -17,13 +17,6 @@ export default function Home({
         Go to Display
       </Button>
       <Button
-        icon="magnify"
-        mode="contained"
-        onPress={() => navigation.navigate("Search")}
-      >
-        Go to Search
-      </Button>
-      <Button
         icon="filter"
         mode="contained"
         onPress={() => navigation.navigate("Filter")}

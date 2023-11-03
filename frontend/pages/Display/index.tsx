@@ -1,15 +1,20 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View, SafeAreaView } from "react-native";
 import useParkingStore from "../../store/useParkingStore";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
+import SearchHeader from "../../components/SearchHeader";
 
-export default function Display() {
+export default function Display({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Display">) {
   const test = useParkingStore();
   return (
-    <View style={styles.page}>
-      <Text>Hello world!</Text>
-    </View>
+    <SafeAreaView style={styles.page}>
+      <SearchHeader navigation={navigation} />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, alignItems: "center", justifyContent: "center" },
+  page: { flex: 1, justifyContent: "flex-start", alignItems: "flex-start" },
 });

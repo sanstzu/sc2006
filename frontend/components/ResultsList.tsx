@@ -20,7 +20,7 @@ export type List = {
 
 type ResultsListProps = {
   data: List[];
-  onSelectChoice?: (selected: List) => void;
+  onSelectChoice: (selected: List) => void;
 };
 
 const styles = StyleSheet.create({
@@ -33,7 +33,8 @@ const styles = StyleSheet.create({
 });
 
 export default function ResultsList(props: ResultsListProps) {
-  const { onSelectChoice = () => {} } = props;
+  console.log({ props });
+  const { onSelectChoice } = props;
   return (
     <View style={styles.container}>
       <FlatList

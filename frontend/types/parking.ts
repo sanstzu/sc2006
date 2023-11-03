@@ -14,6 +14,7 @@ export interface Park {
   };
   name: string; // Development in motorized, Description in bicycle
   distance?: number; // in meters
+  price: number;
 }
 
 export interface MotorizedPark extends Park {
