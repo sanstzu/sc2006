@@ -10,11 +10,6 @@ export type List = {
     latitude: number;
     longitude: number;
   };
-  id?: number;
-  coordinate?: {
-    latitude: number;
-    longitude: number;
-  };
   type: string;
   name: string;
   availableLots?: number;

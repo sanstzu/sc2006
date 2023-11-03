@@ -21,7 +21,7 @@ export default function PlacesList({
       {places.map((place, ii) => (
         <>
           <List.Item
-            key={place.name}
+            key={ii}
             title={place.name}
             description={place.address}
             onPress={() => onSelectChoice(place)}

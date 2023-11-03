@@ -14,8 +14,8 @@ import {
 } from "../types/parking";
 import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
-import useParkingQueryStore from "../store/useParkingQueryStore";
-import { useDebounce } from "../hooks/useDebounce";
+import useParkingQueryStore from "../store/useParkingResultStore";
+// import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -68,7 +68,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
 
   const parkingAxios = useAxios();
   const queryStore = useQueryStore();
-  const setParkingQuery = useParkingQueryStore((state) => state.setQuery);
+  const setParkingResults = useParkingQueryStore((state) => state.setResults);
 
   // useEffect(() => {
   //   handleSearchChange(debounceSearchText);
@@ -136,7 +136,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
 
             rawParkingData = responseData.data;
           }
-
+          setParkingResults(rawParkingData);
           const formattedData: Array<ParkingListItem> = rawParkingData.map(
             (entry: Park) => {
               let listItem: ParkingListItem = {
@@ -205,8 +205,6 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       longitude: parkingListItem.coordinate.longitude,
     };
 
-    // send query for parking details to global store
-    setParkingQuery(parkingQuery);
     navigation.navigate("Result");
   };
 
@@ -285,6 +283,7 @@ const styles = StyleSheet.create({
   },
   resultBody: {
     flex: 1,
+    marginTop: 60,
   },
   searchbar: {
     flexGrow: 1,
