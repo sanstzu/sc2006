@@ -265,7 +265,6 @@ export default function Display() {
         index={0}
         onChange={handleSheetChanges}
         title="Parking Details"
-        hideOpening={parking !== null}
       >
         {/* To be filled */}
       </BottomSheet>

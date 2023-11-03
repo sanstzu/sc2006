@@ -13,7 +13,6 @@ type BottomSheetComponentProps = {
 
   title: string;
   children?: React.ReactNode;
-  hideOpening: boolean;
 } & Omit<BottomSheetProps, "children" | "ref" | "snapPoints">;
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -23,7 +22,6 @@ function BottomSheetComponent({
   onChange: handleSheetChanges,
 
   contentStyle,
-  hideOpening,
   title,
   children,
   ...rest
@@ -31,7 +29,7 @@ function BottomSheetComponent({
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={[hideOpening ? "0%" : "7%", "65%", "100%"]}
+      snapPoints={["7%", "65%", "100%"]}
       onChange={handleSheetChanges}
       {...rest}
     >
