@@ -31,6 +31,7 @@ async function fetchMotorizedParking(
     FROM MotorizedParking AS MP
     JOIN ParkingPrice AS PP
     ON MP.CarParkID = PP.CarParkID
+    AND MP.LotType = PP.LotType
     WHERE MP.CarParkID = ${id};`
     );
 
