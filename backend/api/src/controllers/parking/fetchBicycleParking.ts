@@ -5,13 +5,12 @@ import { getDistance } from "geolib";
 
 type GetBicycleParkingType = {
   type: "Bicycle";
-  Name: string;
-  Latitude: number;
-  Longitude: number;
-  RackType: string;
-  RackCount: number;
-  ShelterIndicator: "Y" | "N";
-  Distance?: number;
+  name: string;
+  coordinate: coordinate;
+  rackType: string;
+  rackCount: number;
+  shelterIndicator: "Y" | "N";
+  distance?: number;
 };
 
 type coordinate = {
@@ -79,8 +78,8 @@ async function fetchBicycleParking(
         ShelterIndicator: "Y" | "N";
       }) =>
         obj.Description.toLowerCase() === name.toLowerCase() &&
-        (obj.Latitude - Qcoor.latitude) < 0.00000001 &&
-        (obj.Longitude - Qcoor.longitude) < 0.00000001
+        Math.abs(obj.Latitude - Qcoor.latitude) < 0.00000001 &&
+        Math.abs(obj.Longitude - Qcoor.longitude) < 0.00000001
     );
 
     let parkingDetails: GetBicycleParkingType;
@@ -93,13 +92,15 @@ async function fetchBicycleParking(
     } else {
       parkingDetails = {
         type: "Bicycle",
-        Name: checker.Description,
-        Latitude: checker.Latitude,
-        Longitude: checker.Longitude,
-        RackType: checker.RackType,
-        RackCount: checker.RackCount,
-        ShelterIndicator: checker.ShelterIndicator,
-        Distance: getDistance(coor, Qcoor),
+        name: checker.Description,
+        coordinate: {
+          latitude: checker.Latitude,
+          longitude: checker.Longitude,
+        },
+        rackType: checker.RackType,
+        rackCount: checker.RackCount,
+        shelterIndicator: checker.ShelterIndicator,
+        distance: getDistance(coor, Qcoor),
       };
     }
 

@@ -26,7 +26,7 @@ export interface MotorizedParkWithPrice extends MotorizedPark {
 
 export interface BicyclePark extends Park {
   type: "Bicycle";
-  Name: string;
+  name: string;
   rackType: string;
   rackCount: number;
   shelterIndicator: "Y" | "N"; // has shelter or not
