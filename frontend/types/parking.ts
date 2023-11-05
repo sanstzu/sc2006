@@ -13,6 +13,7 @@ export interface Park {
     longitude: number;
   };
   name: string; // Development in motorized, Description in bicycle
+  price?: number;
   distance?: number; // in meters
 }
 

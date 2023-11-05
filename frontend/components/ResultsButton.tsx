@@ -7,7 +7,7 @@ const mediumAvailability = 25;
 const highAvailability = 100;
 
 type ResultsButtonProps = {
-  parking: MotorizedPark | Park;
+  parking: Park;
   onPress?: () => void;
 };
 
@@ -87,9 +87,9 @@ export default function ResultsButton({
             size={parking.type !== "Bicycle" ? 35 : 40}
             style={[styles.icon]}
           />
-          {Number(parking.price) > 0 && (
+          {Number(parking?.price) > 0 && (
             <Text style={[styles.text, styles.numberText]}>
-              $ {Number(parking.price).toFixed(2)}
+              $ {Number(parking?.price).toFixed(2)}
             </Text>
           )}
         </View>
