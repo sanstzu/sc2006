@@ -5,7 +5,6 @@ import { MotorizedPark, Park } from "../types/parking";
 
 const mediumAvailability = 25;
 const highAvailability = 100;
-const NUM_OF_LINES = 2;
 
 type ResultsButtonProps = {
   parking: Park;
@@ -16,7 +15,6 @@ export default function ResultsButton({
   parking,
   onPress,
 }: ResultsButtonProps) {
-  const [count, setCount] = useState(true);
   return (
     <Pressable onPress={onPress} style={styles.resultsButton}>
       <View
@@ -25,8 +23,8 @@ export default function ResultsButton({
           {
             flexDirection: "column",
             alignItems: "center",
-            minWidth: 60,
-            flex: 0,
+            flexBasis: "auto",
+            flexGrow: 0,
           },
         ]}
       >
@@ -42,14 +40,14 @@ export default function ResultsButton({
                 ? "#F59E0B"
                 : "#DC2626"
             }
-            size={40}
+            size={34}
             style={styles.icon}
           />
         </View>
         <View>
-          <Text style={[styles.text, styles.numberText]}>
+          <Text numberOfLines={1} style={[styles.text, styles.numberText]}>
             {!parking.distance
-              ? "error"
+              ? "NA"
               : parking.distance < 1000
               ? parking.distance.toFixed(0) + " m"
               : (parking.distance / 1000).toFixed(2) + " km"}
@@ -63,15 +61,13 @@ export default function ResultsButton({
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            flex: 1,
+            flexGrow: 1,
+            flexShrink: 1,
           },
         ]}
       >
-        <View>
-          <Text
-            numberOfLines={NUM_OF_LINES}
-            style={[styles.text, styles.carParkText, { marginBottom: 4 }]}
-          >
+        <View style={{ flexDirection: "row", flexShrink: 1 }}>
+          <Text style={[styles.text, styles.carParkText, { marginBottom: 4 }]}>
             {parking.name}
           </Text>
         </View>
@@ -86,14 +82,14 @@ export default function ResultsButton({
           ]}
         >
           <IconButton
-            icon={parking.type === "Car" ? "car-outline" : "bicycle"}
+            icon={parking.type !== "Bicycle" ? "car-outline" : "bicycle"}
             iconColor={"lightslategray"}
-            size={parking.type === "Car" ? 35 : 40}
+            size={parking.type !== "Bicycle" ? 35 : 40}
             style={[styles.icon]}
           />
           {Number(parking.price) > 0 && (
             <Text style={[styles.text, styles.numberText]}>
-              $ {parking.price.toFixed(2)}
+              $ {Number(parking.price).toFixed(2)}
             </Text>
           )}
         </View>
@@ -113,11 +109,10 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     gap: 16,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     borderColor: "#CBD5E1",
     width: "100%",
     borderBottomWidth: 1,
-    flexShrink: 0,
   },
   row: {
     flexDirection: "row",
@@ -127,17 +122,14 @@ const styles = StyleSheet.create({
     // fontFamily: 'Inter',
   },
   numberText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "400",
     color: "#64748B",
   },
   carParkText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "500",
     color: "#000",
-    maxWidth: "85%",
-    minWidth: "80%",
-    width: "80%",
   },
   addressText: {
     fontSize: 22,

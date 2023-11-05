@@ -2,7 +2,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
 import { IconButton, Searchbar, useTheme } from "react-native-paper";
 import { RootStackParamList } from "../App";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAxios } from "../hooks/useAxios";
 import ResultsList from "./ResultsList";
 import PlacesList, { Place } from "./PlacesList";
@@ -16,6 +16,7 @@ import {
 import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
 import useParkingStore from "../store/useParkingStore";
+import Loading from "./Loading";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -58,6 +59,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   };
 
   const [searchText, setSearchText] = useState("");
+  const [searchQuery, setSearchQuery] = useState<SearchQuery>();
   const [searchState, setSearchState] = useState<SearchState>(
     SearchState.Empty
   );
@@ -67,18 +69,19 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const [parkingSearchResults, setParkingSearchResults] = useState<Array<Park>>(
     []
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   const parkingAxios = useAxios();
-  const queryStore = useQueryStore((state) => ({
-    vehicleType: state.vehicleType,
-    price: state.price,
-    sort: state.sort,
-    coordinate: state.coordinate,
-  }));
+  const vehicleTypeFilter = useQueryStore((state) => state.vehicleType);
+  const priceFilter = useQueryStore((state) => state.price);
+  const sortFilter = useQueryStore((state) => state.sort);
   const setParkingResult = useParkingStore((state) => state.setParking);
   const setParkingPrices = useParkingStore((state) => state.setPrice);
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
+    setIsLoading(true);
+    setPlaceSearchResults([]);
+    setParkingSearchResults([]);
     try {
       switch (state) {
         case SearchState.SearchingPlace:
@@ -90,10 +93,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
           break;
 
         case SearchState.SearchingParking:
-          let rawParkingData: Array<Park> = [];
-          console.log({ vehicleType: queryStore.vehicleType });
+          let parkingData: Array<Park> = [];
 
-          if (queryStore.vehicleType !== "Bicycle") {
+          if (vehicleTypeFilter !== "Bicycle") {
             let timeData: Date = new Date();
 
             try {
@@ -101,8 +103,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 `${TIMEZONEDB_API_BASE_URL}/get-time-zone`,
                 {
                   params: {
-                    // key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
-                    key: "0GCLGEQUDUFS",
+                    key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
                     format: "json",
                     by: "zone",
                     zone: "SG",
@@ -117,7 +118,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
               });
             }
 
-            const { data: responseData } = await parkingAxios.get(
+            const { config, data: responseData } = await parkingAxios.get(
               "/parking/motorized/search",
               {
                 params: {
@@ -125,25 +126,32 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                   day: dayMap[timeData.getDay()],
                   time: getHHMMSSFormat(timeData),
                   // get default filters from global store
-                  order: queryStore.sort.toLowerCase(),
-                  "vehicle-type": vehicleTypeMap[queryStore.vehicleType],
+                  order: sortFilter.toLowerCase(),
+                  "vehicle-type": vehicleTypeMap[vehicleTypeFilter],
                   "price-start": 0,
-                  "price-end": queryStore.price,
+                  "price-end": priceFilter,
                 },
               }
             );
-            console.log({ responseData });
-            rawParkingData = responseData.data;
+            parkingData = responseData.data;
           } else {
             const { data: responseData } = await parkingAxios.get(
               "/parking/bicycle/search",
               { params: { "place-id": query?.place_id } }
             );
-            console.log("bicycle");
 
-            rawParkingData = responseData.data;
+            parkingData = responseData.data;
           }
-          setParkingSearchResults(rawParkingData);
+
+          let nameSet = new Set(parkingData.map((parking) => parking.name));
+          const uniqueParkingData = parkingData.reduce((accumulator, curr) => {
+            if (nameSet.delete(curr.name)) {
+              return [...accumulator, curr];
+            }
+            return accumulator;
+          }, [] as Array<Park>);
+
+          setParkingSearchResults(uniqueParkingData);
           break;
 
         default:
@@ -151,6 +159,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       }
     } catch (error) {
       console.error({ name: "Failed to get from parking backend API", error });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -174,6 +184,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       name: place.name,
       place_id: place.place_id,
     };
+    setSearchQuery(query);
     setSearchText(query.name);
     await getSearchResults(newSearchState, query);
     setSearchState(newSearchState);
@@ -190,13 +201,18 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     navigation.navigate("Result");
   };
 
+  useEffect(() => {
+    if (searchQuery) {
+      getSearchResults(SearchState.SearchingParking, searchQuery);
+    }
+  }, [vehicleTypeFilter, priceFilter, sortFilter]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Searchbar
           placeholder="Search"
           value={searchText}
-          // onChangeText={(text) => setSearchText(text)}
           onChangeText={handleSearchChange}
           inputStyle={{ color: "black" }}
           theme={colors.searchbar}
@@ -211,6 +227,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
         />
       </View>
       <ScrollView style={styles.resultBody}>
+        {isLoading && <Loading />}
         {searchState === SearchState.SearchingPlace && (
           <PlacesList
             places={placeSearchResults}
@@ -249,23 +266,19 @@ const styles = StyleSheet.create({
     flex: 1,
     top: 0,
     left: 0,
-    paddingTop: 60,
   },
   header: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    flex: 1,
+    flexBasis: "auto",
+    flexGrow: 0,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 8,
-    zIndex: 2,
-    backgroundColor: "#F2F2F2",
+    padding: 8,
   },
   resultBody: {
     flex: 1,
-    marginTop: 60,
+    flexGrow: 1,
   },
   searchbar: {
     flexGrow: 1,
@@ -277,7 +290,6 @@ const styles = StyleSheet.create({
   button: {
     height: "100%",
     width: 58,
-    aspectRatio: 1 / 1,
     margin: 0,
     borderRadius: 12,
     borderWidth: 1,

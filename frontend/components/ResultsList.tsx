@@ -1,7 +1,8 @@
 import React from "react";
 import { FlatList, View, StyleSheet, Dimensions } from "react-native";
 import ResultsButton from "./ResultsButton";
-import { Park } from "../types/parking";
+import { MotorizedPark, Park } from "../types/parking";
+import useQueryStore from "../store/useQueryStore";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -20,7 +21,6 @@ const styles = StyleSheet.create({
 });
 
 export default function ResultsList(props: ResultsListProps) {
-  console.log({ props });
   const { onSelectChoice } = props;
   return (
     <View style={styles.container}>

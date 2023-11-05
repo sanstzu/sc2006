@@ -19,15 +19,14 @@ export default function PlacesList({
   return (
     <View style={styles.list}>
       {places.map((place, ii) => (
-        <>
+        <View key={ii}>
           <List.Item
-            key={ii}
             title={place.name}
             description={place.address}
             onPress={() => onSelectChoice(place)}
           />
           {ii < places.length - 1 && <Divider />}
-        </>
+        </View>
       ))}
     </View>
   );

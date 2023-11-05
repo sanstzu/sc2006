@@ -20,5 +20,5 @@ export default function ParkingInfo({
 }
 
 const styles = StyleSheet.create({
-  page: { flex: 1, alignItems: "center", justifyContent: "center" },
+  page: { flex: 1, alignItems: "flex-start", justifyContent: "flex-start" },
 });
