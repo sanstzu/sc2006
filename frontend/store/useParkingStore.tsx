@@ -5,10 +5,6 @@ import { produce } from "immer";
 
 export type ParkingStore = {
   parking: null | BicyclePark | MotorizedPark;
-  destination: null | {
-    latitude: number;
-    longitude: number;
-  };
   price: Price[] | null;
   setParking: (parking: BicyclePark | MotorizedPark) => void;
   setPrice: (price: Price[]) => void;
