@@ -1,31 +1,22 @@
-import {
-  StyleSheet,
-  View,
-  Dimensions,
-  Button,
-  SafeAreaView,
-} from "react-native";
+import { StyleSheet, View, Dimensions } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import CalloutComponent from "../../components/Callout";
 import { useIsFocused } from "@react-navigation/native";
 import BottomSheet from "../../components/BottomSheet";
-import BottomSheetElement from "@gorhom/bottom-sheet";
+
 import useParkingStore from "../../store/useParkingStore";
-import {
-  MotorizedPark,
-  MotorizedParkWithPrice,
-  Park,
-  Price,
-} from "../../types/parking";
+import { BicyclePark, MotorizedPark, Price } from "../../types/parking";
 import { useAxios } from "../../hooks/useAxios";
 import useQueryStore from "../../store/useQueryStore";
 import ParkingInfo from "../../components/ParkingInfo";
-import { useSharedValue } from "react-native-reanimated";
-import SearchHeader from "../../components/SearchHeader";
+
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import FloatingActionButton from "../../components/FloatingActionButton";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -42,6 +33,7 @@ function getTime(date: Date) {
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone: "Asia/Singapore",
   });
 }
 
@@ -68,6 +60,7 @@ const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function Display({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "Display">) {
+  const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const axios = useAxios();
 
@@ -87,7 +80,9 @@ export default function Display({
     zoom?: number;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
+  const [nearbyPark, setNearbyPark] = useState<
+    Array<MotorizedSearch | BicyclePark>
+  >([]);
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
   const testRef = useRef(null);
@@ -121,33 +116,44 @@ export default function Display({
       }
 
       let locationTmp = await Location.getCurrentPositionAsync({});
+
       setUserLoc(locationTmp);
     })();
   }, [isFocused, parking]);
 
-  // Retrieves the user current location
+  // Retrieves nearby parking
   useEffect(() => {
     (async () => {
       let locationTmp = userLoc;
       if (userLoc) {
         // Get current date
-        const now = new Date();
-        const reqParams = {
-          latitude: locationTmp?.coords.latitude ?? 0,
-          longitude: locationTmp?.coords.longitude ?? 0,
-          day: getShortDayOfWeek(now),
-          time: getTime(now),
-          order: "distance",
-          "vehicle-type": getVehicleCode(queryVehicleType),
-          "price-start": 0,
-          "price-end": 100,
-        };
 
-        const resp = await axios.get("/parking/motorized/search", {
-          params: reqParams,
-        });
+        if (queryVehicleType === "Bicycle") {
+          const resp = await axios.get("/parking/bicycle/search", {
+            params: {
+              latitude: locationTmp?.coords.latitude ?? 0,
+              longitude: locationTmp?.coords.longitude ?? 0,
+            },
+          });
+          setNearbyPark(resp.data.data);
+        } else {
+          const now = new Date();
+          const reqParams = {
+            latitude: locationTmp?.coords.latitude ?? 0,
+            longitude: locationTmp?.coords.longitude ?? 0,
+            day: getShortDayOfWeek(now),
+            time: getTime(now),
+            order: "distance",
+            "vehicle-type": getVehicleCode(queryVehicleType),
+            "price-start": 0,
+            "price-end": 10,
+          };
 
-        setNearbyPark(resp.data.data);
+          const resp = await axios.get("/parking/motorized/search", {
+            params: reqParams,
+          });
+          setNearbyPark(resp.data.data);
+        }
       }
     })();
   }, [isFocused, parking, userLoc]);
@@ -166,33 +172,31 @@ export default function Display({
         maxLng: parking.coordinate.longitude,
       });
     } else {
-      (async () => {
-        let locationTmp = await Location.getCurrentPositionAsync({});
+      let locationTmp = userLoc;
 
-        let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
-        let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
-        let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
-        let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
+      let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
+      let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
+      let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
+      let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
 
-        nearbyPark.forEach((park) => {
-          minLat = Math.min(minLat, park.coordinate.latitude);
-          maxLat = Math.max(maxLat, park.coordinate.latitude);
-          minLng = Math.min(minLng, park.coordinate.longitude);
-          maxLng = Math.max(maxLng, park.coordinate.longitude);
+      nearbyPark.forEach((park) => {
+        minLat = Math.min(minLat, park.coordinate.latitude);
+        maxLat = Math.max(maxLat, park.coordinate.latitude);
+        minLng = Math.min(minLng, park.coordinate.longitude);
+        maxLng = Math.max(maxLng, park.coordinate.longitude);
+      });
+
+      if (nearbyPark.length === 0) {
+        setCoordRange(null);
+      } else {
+        setCoordRange({
+          minLat,
+          maxLat,
+          minLng,
+          maxLng,
+          zoom: undefined,
         });
-
-        if (nearbyPark.length === 0) {
-          setCoordRange(null);
-        } else {
-          setCoordRange({
-            minLat,
-            maxLat,
-            minLng,
-            maxLng,
-            zoom: undefined,
-          });
-        }
-      })();
+      }
     }
   }, [nearbyPark, parking]);
 
@@ -217,7 +221,6 @@ export default function Display({
 
   const onSelectParking = async (park: MotorizedSearch) => {
     // fetches park
-
     const resp = await axios.get(`/parking/motorized/${park.id}`, {
       params: {
         longitude: userLoc?.coords.longitude,
@@ -232,9 +235,20 @@ export default function Display({
     setPricings(prices);
   };
 
+  const onSelectBicycleParking = (park: BicyclePark) => {
+    setParking(park);
+  };
+
   return (
-    <SafeAreaView style={styles.page}>
-      <SearchHeader navigation={navigation} />
+    <View
+      style={{
+        ...styles.page,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
+      }}
+    >
       <MapView
         style={styles.map}
         showsUserLocation={true}
@@ -262,7 +276,11 @@ export default function Display({
                     zIndex: 100,
                   }}
                   onPress={() => {
-                    onSelectParking(park);
+                    if (queryVehicleType === "Bicycle") {
+                      onSelectBicycleParking(park as BicyclePark);
+                    } else {
+                      onSelectParking(park as MotorizedSearch);
+                    }
                   }}
                 >
                   <CalloutComponent park={park} />
@@ -284,24 +302,29 @@ export default function Display({
       {/* Bottom sheet */}
       {parking && (
         <BottomSheet
-          index={bottomSheetIndex}
+          index={1}
           title="Parking Details"
           contentStyle={{
             flex: 1,
             width: SCREEN_WIDTH,
+          }}
+          style={{
+            zIndex: 101,
           }}
         >
           <ParkingInfo
             park={parking}
             price={prices}
             onLocationPress={animateToParking}
-            onParkingRemove={() => {
-              setBottomSheetIndex(-1);
-            }}
           />
         </BottomSheet>
       )}
-    </SafeAreaView>
+      <FloatingActionButton
+        visible={isFocused ? (parking ? false : true) : false}
+        onFilterPress={() => navigation.navigate("Filter")}
+        onMapSearchPress={() => navigation.navigate("Result")}
+      />
+    </View>
   );
 }
 

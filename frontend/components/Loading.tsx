@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import { Text } from "react-native-paper";
+import { ActivityIndicator, Text } from "react-native-paper";
 
 export default function Loading() {
   return (
@@ -10,7 +10,7 @@ export default function Loading() {
         paddingVertical: 16,
       }}
     >
-      <Text variant="bodyLarge">Loading...</Text>
+      <ActivityIndicator animating={true} size={"large"} color="#475569" />
     </View>
   );
 }
