@@ -4,7 +4,7 @@ import { MotorizedPark } from "../../types/parking";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
 interface MotorizedSearch extends MotorizedPark {
-  price: string;
+  price: number;
   isSingleEntry: boolean;
 }
 

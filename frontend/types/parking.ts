@@ -8,21 +8,18 @@ export type Price = {
 
 export interface Park {
   type: "Car" | "Motor" | "Heavy" | "Bicycle";
-  id: number;
   coordinate: {
     latitude: number;
     longitude: number;
   };
   name: string; // Development in motorized, Description in bicycle
   distance?: number; // in meters
-  price: number;
 }
 
 export interface MotorizedPark extends Park {
   type: "Car" | "Motor" | "Heavy";
   id: string;
   availableLots: number;
-  isSingleEntry: boolean;
 }
 
 export interface MotorizedParkWithPrice extends MotorizedPark {
