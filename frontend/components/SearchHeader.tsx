@@ -17,6 +17,9 @@ import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
 import useParkingStore from "../store/useParkingStore";
 import Loading from "./Loading";
+import { useIsFocused } from "@react-navigation/native";
+import { LocationObject } from "expo-location";
+import * as Location from "expo-location";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -57,6 +60,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       },
     },
   };
+
+  const [userLoc, setUserLoc] = useState<LocationObject>();
+  const isFocused = useIsFocused();
 
   const [searchText, setSearchText] = useState("");
   const [searchQuery, setSearchQuery] = useState<SearchQuery>();
@@ -164,19 +170,41 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        return;
+      }
+
+      let locationTmp = await Location.getCurrentPositionAsync({});
+      console.log(locationTmp);
+      setUserLoc(locationTmp);
+    })();
+  }, [isFocused]);
+
   const handleSearchChange = async (text: string) => {
     setSearchText(text);
     if (text.trim() === "") {
       setSearchState(SearchState.Empty);
       return;
     }
-
-    const newSearchState = SearchState.SearchingPlace;
-    const query: SearchQuery = { name: text };
-    await getSearchResults(newSearchState, query);
-
-    setSearchState(newSearchState);
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const newSearchState = SearchState.SearchingPlace;
+      const query: SearchQuery = { name: searchText };
+      await getSearchResults(newSearchState, query);
+
+      if (isMounted) setSearchState(newSearchState);
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [searchText]);
 
   const handleSelectPlace = async (place: Place) => {
     const newSearchState = SearchState.SearchingParking;
@@ -190,15 +218,26 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     setSearchState(newSearchState);
   };
 
-  const handleSelectParking = (parking: Park) => {
+  const handleSelectParking = async (parking: Park & { id?: string }) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
       setParkingPrices([]);
       return;
     }
     setParkingResult(parking as MotorizedPark);
-    setParkingPrices((parking as MotorizedParkWithPrice).prices);
-    navigation.navigate("Result");
+
+    const resp = await parkingAxios.get(
+      `/parking/motorized/${parking.id as string}`,
+      {
+        params: {
+          latitude: userLoc?.coords.latitude,
+          longitude: userLoc?.coords.longitude,
+          "vehicle-type": vehicleTypeMap[vehicleTypeFilter],
+        },
+      }
+    );
+    setParkingPrices((resp.data.data as MotorizedParkWithPrice).prices);
+    navigation.navigate("Display");
   };
 
   useEffect(() => {
@@ -262,7 +301,6 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     width: "100%",
-    height: "100%",
     zIndex: 2000,
     flex: 1,
     top: 0,

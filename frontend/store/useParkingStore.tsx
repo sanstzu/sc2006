@@ -5,6 +5,10 @@ import { produce } from "immer";
 
 export type ParkingStore = {
   parking: null | BicyclePark | MotorizedPark;
+  destination: null | {
+    latitude: number;
+    longitude: number;
+  };
   price: Price[] | null;
   setParking: (parking: BicyclePark | MotorizedPark) => void;
   setPrice: (price: Price[]) => void;
@@ -17,6 +21,7 @@ const parkingStore = (
 ) => ({
   parking: null,
   price: null,
+  destination: null,
   setParking: (parking: BicyclePark | MotorizedPark) =>
     set(
       produce<ParkingStore>((state) => {

@@ -129,7 +129,7 @@ function ParkingInfo({
           <Text variant="bodyMedium">
             {park.distance >= 1000
               ? `${(park.distance / 1000).toFixed(1)} km`
-              : `${park.distance} m`}
+              : `${park.distance.toFixed(1)} m`}
           </Text>
         )}
       </View>
