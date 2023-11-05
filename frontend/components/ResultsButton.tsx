@@ -1,26 +1,24 @@
 import React, { useState } from "react";
 import { Text, StyleSheet, View, Pressable } from "react-native";
 import { IconButton } from "react-native-paper";
+import { MotorizedPark, Park } from "../types/parking";
 
 const mediumAvailability = 25;
 const highAvailability = 100;
 const NUM_OF_LINES = 2;
 
 type ResultsButtonProps = {
-  parkingId?: string;
-  availableLots?: number;
-  distance: number;
-  type: string;
-  rate?: number;
-  name: string;
-  address?: string;
+  parking: Park;
   onPress?: () => void;
 };
 
-export default function ResultsButton(props: ResultsButtonProps) {
+export default function ResultsButton({
+  parking,
+  onPress,
+}: ResultsButtonProps) {
   const [count, setCount] = useState(true);
   return (
-    <Pressable onPress={props.onPress} style={styles.resultsButton}>
+    <Pressable onPress={onPress} style={styles.resultsButton}>
       <View
         style={[
           styles.container,
@@ -36,11 +34,11 @@ export default function ResultsButton(props: ResultsButtonProps) {
           <IconButton
             icon="circle"
             iconColor={
-              props.availableLots === undefined
+              parking.type === "Bicycle"
                 ? "#CBD5E1"
-                : props.availableLots > highAvailability
+                : (parking as MotorizedPark).availableLots > highAvailability
                 ? "#16A34A"
-                : props.availableLots > mediumAvailability
+                : (parking as MotorizedPark).availableLots > mediumAvailability
                 ? "#F59E0B"
                 : "#DC2626"
             }
@@ -50,11 +48,11 @@ export default function ResultsButton(props: ResultsButtonProps) {
         </View>
         <View>
           <Text style={[styles.text, styles.numberText]}>
-            {!props.distance
+            {!parking.distance
               ? "error"
-              : props.distance < 1000
-              ? props.distance.toFixed(0) + " m"
-              : (props.distance / 1000).toFixed(2) + " km"}
+              : parking.distance < 1000
+              ? parking.distance.toFixed(0) + " m"
+              : (parking.distance / 1000).toFixed(2) + " km"}
           </Text>
         </View>
       </View>
@@ -74,7 +72,7 @@ export default function ResultsButton(props: ResultsButtonProps) {
             numberOfLines={NUM_OF_LINES}
             style={[styles.text, styles.carParkText, { marginBottom: 4 }]}
           >
-            {props.name}
+            {parking.name}
           </Text>
         </View>
         <View
@@ -88,14 +86,14 @@ export default function ResultsButton(props: ResultsButtonProps) {
           ]}
         >
           <IconButton
-            icon={props.type === "Car" ? "car-outline" : "bicycle"}
+            icon={parking.type === "Car" ? "car-outline" : "bicycle"}
             iconColor={"lightslategray"}
-            size={props.type === "Car" ? 35 : 40}
+            size={parking.type === "Car" ? 35 : 40}
             style={[styles.icon]}
           />
-          {props.rate && (
+          {Number(parking.price) > 0 && (
             <Text style={[styles.text, styles.numberText]}>
-              $ {props.rate.toFixed(2)}
+              $ {parking.price.toFixed(2)}
             </Text>
           )}
         </View>

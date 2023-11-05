@@ -4,18 +4,18 @@ import { IconButton, Searchbar, useTheme } from "react-native-paper";
 import { RootStackParamList } from "../App";
 import { useState } from "react";
 import { useAxios } from "../hooks/useAxios";
-import ResultsList, { List as ParkingListItem } from "./ResultsList";
+import ResultsList from "./ResultsList";
 import PlacesList, { Place } from "./PlacesList";
 import {
   Park,
   MotorizedPark,
   BicyclePark,
   ParkingQuery,
+  MotorizedParkWithPrice,
 } from "../types/parking";
 import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
-import useParkingQueryStore from "../store/useParkingResultStore";
-// import { useDebounce } from "../hooks/useDebounce";
+import useParkingStore from "../store/useParkingStore";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -58,21 +58,25 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   };
 
   const [searchText, setSearchText] = useState("");
-  // const debounceSearchText = useDebounce(searchText, DEBOUNCE_DELAY;
   const [searchState, setSearchState] = useState<SearchState>(
     SearchState.Empty
   );
-  const [searchResults, setSearchResults] = useState<
-    Array<Place> | Array<ParkingListItem>
-  >([]);
+  const [placeSearchResults, setPlaceSearchResults] = useState<Array<Place>>(
+    []
+  );
+  const [parkingSearchResults, setParkingSearchResults] = useState<Array<Park>>(
+    []
+  );
 
   const parkingAxios = useAxios();
-  const queryStore = useQueryStore();
-  const setParkingResults = useParkingQueryStore((state) => state.setResults);
-
-  // useEffect(() => {
-  //   handleSearchChange(debounceSearchText);
-  // }, [debounceSearchText]);
+  const queryStore = useQueryStore((state) => ({
+    vehicleType: state.vehicleType,
+    price: state.price,
+    sort: state.sort,
+    coordinate: state.coordinate,
+  }));
+  const setParkingResult = useParkingStore((state) => state.setParking);
+  const setParkingPrices = useParkingStore((state) => state.setPrice);
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     try {
@@ -82,11 +86,12 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             "/maps/places/search",
             { params: { input: query.name } }
           );
-          setSearchResults(responseData.data);
+          setPlaceSearchResults(responseData.data);
           break;
 
         case SearchState.SearchingParking:
           let rawParkingData: Array<Park> = [];
+          console.log({ vehicleType: queryStore.vehicleType });
 
           if (queryStore.vehicleType !== "Bicycle") {
             let timeData: Date = new Date();
@@ -96,7 +101,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 `${TIMEZONEDB_API_BASE_URL}/get-time-zone`,
                 {
                   params: {
-                    key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
+                    // key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
+                    key: "0GCLGEQUDUFS",
                     format: "json",
                     by: "zone",
                     zone: "SG",
@@ -121,8 +127,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                   // get default filters from global store
                   order: queryStore.sort.toLowerCase(),
                   "vehicle-type": vehicleTypeMap[queryStore.vehicleType],
-                  "price-start": queryStore.price,
-                  "price-end": 99.99,
+                  "price-start": 0,
+                  "price-end": queryStore.price,
                 },
               }
             );
@@ -131,36 +137,13 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
           } else {
             const { data: responseData } = await parkingAxios.get(
               "/parking/bicycle/search",
-              { params: { place_id: query?.place_id } }
+              { params: { "place-id": query?.place_id } }
             );
+            console.log("bicycle");
 
             rawParkingData = responseData.data;
           }
-          setParkingResults(rawParkingData);
-          const formattedData: Array<ParkingListItem> = rawParkingData.map(
-            (entry: Park) => {
-              let listItem: ParkingListItem = {
-                id: entry.id,
-                type: entry.type,
-                name: entry.name,
-                distance: entry.distance as number,
-                coordinate: {
-                  latitude: entry.coordinate.latitude,
-                  longitude: entry.coordinate.longitude,
-                },
-                price: entry.price ? entry.price.toString() : "NA",
-              };
-
-              if (entry.type !== "Bicycle") {
-                const motorizedEntry = entry as MotorizedPark;
-                listItem.availableLots = motorizedEntry.availableLots;
-              }
-
-              return listItem;
-            }
-          );
-          console.log({ formattedData });
-          setSearchResults(formattedData);
+          setParkingSearchResults(rawParkingData);
           break;
 
         default:
@@ -173,13 +156,14 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
 
   const handleSearchChange = async (text: string) => {
     setSearchText(text);
-    let newSearchState = SearchState.Empty;
-
-    if (text.trim() !== "") {
-      newSearchState = SearchState.SearchingPlace;
-      const query: SearchQuery = { name: text };
-      await getSearchResults(newSearchState, query);
+    if (text.trim() === "") {
+      setSearchState(SearchState.Empty);
+      return;
     }
+
+    const newSearchState = SearchState.SearchingPlace;
+    const query: SearchQuery = { name: text };
+    await getSearchResults(newSearchState, query);
 
     setSearchState(newSearchState);
   };
@@ -195,16 +179,14 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     setSearchState(newSearchState);
   };
 
-  const handleSelectParking = (parkingListItem: ParkingListItem) => {
-    let parkingQuery: ParkingQuery = {
-      id:
-        parkingListItem.type !== "Bicycle"
-          ? (parkingListItem.id as number)
-          : parkingListItem.name,
-      latitude: parkingListItem.coordinate.latitude,
-      longitude: parkingListItem.coordinate.longitude,
-    };
-
+  const handleSelectParking = (parking: Park) => {
+    if (parking.type === "Bicycle") {
+      setParkingResult(parking as BicyclePark);
+      setParkingPrices([]);
+      return;
+    }
+    setParkingResult(parking as MotorizedPark);
+    setParkingPrices((parking as MotorizedParkWithPrice).prices);
     navigation.navigate("Result");
   };
 
@@ -231,13 +213,13 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       <ScrollView style={styles.resultBody}>
         {searchState === SearchState.SearchingPlace && (
           <PlacesList
-            places={searchResults as Array<Place>}
+            places={placeSearchResults}
             onSelectChoice={handleSelectPlace}
           />
         )}
         {searchState === SearchState.SearchingParking && (
           <ResultsList
-            data={searchResults as Array<ParkingListItem>}
+            data={parkingSearchResults}
             onSelectChoice={handleSelectParking}
           />
         )}
@@ -304,8 +286,6 @@ const styles = StyleSheet.create({
 });
 
 const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
-/** delay of user input processing in ms */
-const DEBOUNCE_DELAY = 400;
 
 const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 

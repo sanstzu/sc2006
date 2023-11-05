@@ -1,26 +1,13 @@
 import React from "react";
 import { FlatList, View, StyleSheet, Dimensions } from "react-native";
 import ResultsButton from "./ResultsButton";
+import { Park } from "../types/parking";
 
 const screenWidth = Dimensions.get("window").width;
 
-export type List = {
-  id?: number;
-  coordinate: {
-    latitude: number;
-    longitude: number;
-  };
-  type: string;
-  name: string;
-  availableLots?: number;
-  distance: number;
-  price?: string;
-  address?: string;
-};
-
 type ResultsListProps = {
-  data: List[];
-  onSelectChoice: (selected: List) => void;
+  data: Array<Park>;
+  onSelectChoice: (selected: Park) => void;
 };
 
 const styles = StyleSheet.create({
@@ -39,15 +26,11 @@ export default function ResultsList(props: ResultsListProps) {
     <View style={styles.container}>
       <FlatList
         data={props.data}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <ResultsButton
+            key={index}
+            parking={item}
             onPress={() => onSelectChoice(item)}
-            type={item.type}
-            name={item.name}
-            address={item.address}
-            availableLots={item.availableLots}
-            distance={+item.distance.toFixed(1)}
-            rate={item.price ? +item.price : undefined}
           />
         )}
       />

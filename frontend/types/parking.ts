@@ -7,7 +7,7 @@ export type Price = {
 
 export interface Park {
   type: "Car" | "Motor" | "Heavy" | "Bicycle";
-  id: number; // in meters
+  id: number;
   coordinate: {
     latitude: number;
     longitude: number;
