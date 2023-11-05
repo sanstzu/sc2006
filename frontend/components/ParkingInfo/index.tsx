@@ -36,7 +36,8 @@ function ParkingInfo({
   onParkingRemove,
 }: ParkingInfoProps) {
   const now = new Date();
-  const nowTime = (now.getTime() % (24 * 60 * 60 * 1000)) / 1000;
+  const nowTime =
+    ((now.getTime() + 8 * 60 * 60 * 1000) % (24 * 60 * 60 * 1000)) / 1000;
   const nowDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
     now.getDay()
   ] as Price["day"];
