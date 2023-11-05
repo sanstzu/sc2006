@@ -7,7 +7,7 @@ const mediumAvailability = 25;
 const highAvailability = 100;
 
 type ResultsButtonProps = {
-  parking: Park;
+  parking: MotorizedPark | Park;
   onPress?: () => void;
 };
 
