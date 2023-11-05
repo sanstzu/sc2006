@@ -51,13 +51,11 @@ async function searchMotorizedParking(
           message: "Invalid place id!",
         });
       }
-
     } else {
       if(req.query.latitude !== undefined && req.query.longitude !== undefined) {
         lat = parseFloat(req.query.latitude.toString());
         long = parseFloat(req.query.longitude.toString());
-      }
-      else {
+      } else {
         return res.status(404).json({
           status: 0,
           message: "Invalid latitude and longitude!",

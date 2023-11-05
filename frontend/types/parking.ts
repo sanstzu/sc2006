@@ -3,6 +3,7 @@ export type Price = {
   endTime: string; // HH:MM:SS
   day: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
   price: number;
+  isSingleEntry: boolean;
 };
 
 export interface Park {
@@ -17,8 +18,8 @@ export interface Park {
 
 export interface MotorizedPark extends Park {
   type: "Car" | "Motor" | "Heavy";
+  id: string;
   availableLots: number;
-  isSingleEntry: boolean;
 }
 
 export interface MotorizedParkWithPrice extends MotorizedPark {
@@ -27,9 +28,23 @@ export interface MotorizedParkWithPrice extends MotorizedPark {
 
 export interface BicyclePark extends Park {
   type: "Bicycle";
-  name: string;
+  // Name: string;
   rackType: string;
   rackCount: number;
   shelterIndicator: "Y" | "N"; // has shelter or not
   distance?: number; // in meters
+}
+
+export interface ParkingQuery {
+  id: number | string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface MotorizedParkingQuery extends ParkingQuery {
+  id: number;
+}
+
+export interface BicycleParkingQuery extends ParkingQuery {
+  id: string;
 }

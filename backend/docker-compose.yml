@@ -8,6 +8,8 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+    command:
+      - '--skip-log-bin'
     ports:
       - 3306:3306
     volumes:
@@ -55,6 +57,7 @@ services:
     ports:
       - 8080:8080
     environment:
+      API_PORT: ${API_PORT}
       DB_HOST: database
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}

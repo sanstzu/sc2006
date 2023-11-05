@@ -21,10 +21,11 @@ const codesCentralHDB = [
 ];
 
 export default async function updateHDBPrice() {
-  // Insert prices of HDB car parks outside central area
-  weekdays.map(
-    async (day) =>
-      await query(`INSERT INTO ParkingPrice (CarParkID, LotType, Day, StartTime, EndTime, Price, IsSingleEntry, CreatedOn, UpdatedOn)
+  try {
+    // Insert prices of HDB car parks outside central area
+    weekdays.map(
+      async (day) =>
+        await query(`INSERT INTO ParkingPrice (CarParkID, LotType, Day, StartTime, EndTime, Price, IsSingleEntry, CreatedOn, UpdatedOn)
     SELECT 
         CarParkID, 
         LotType, 
@@ -41,10 +42,10 @@ export default async function updateHDBPrice() {
         Price = VALUES(Price), 
         UpdatedOn = VALUES(UpdatedOn);
     `)
-  );
-  weekdays.map(
-    async (day) =>
-      await query(`INSERT INTO ParkingPrice (CarParkID, LotType, Day, StartTime, EndTime, Price, IsSingleEntry, CreatedOn, UpdatedOn)
+    );
+    weekdays.map(
+      async (day) =>
+        await query(`INSERT INTO ParkingPrice (CarParkID, LotType, Day, StartTime, EndTime, Price, IsSingleEntry, CreatedOn, UpdatedOn)
       SELECT
             CarParkID, 
             LotType, 
@@ -61,15 +62,18 @@ export default async function updateHDBPrice() {
             Price = VALUES(Price), 
             UpdatedOn = VALUES(UpdatedOn);
         `)
-  );
+    );
 
-  const count = await query(
-    `SELECT COUNT(*) FROM ParkingPrice WHERE CarParkID IN ('${codesCentralHDB.join(
-      "','"
-    )}')`
-  );
+    const count = await query(
+      `SELECT COUNT(*) FROM ParkingPrice WHERE CarParkID IN ('${codesCentralHDB.join(
+        "','"
+      )}')`
+    );
 
-  console.log(
-    `${new Date().toISOString()} Updated price database of with HDB prices.`
-  );
+    console.log(
+      `${new Date().toISOString()} Updated price database of with HDB prices.`
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
