@@ -33,8 +33,8 @@ async function fetchMotorizedParking(
     JOIN ParkingPrice AS PP
     ON MP.CarParkID = PP.CarParkID
     AND MP.LotType = PP.LotType
-    WHERE MP.CarParkID = ${id}
-    AND MP.LotType = ${vehicleType};`
+    WHERE MP.CarParkID = '${id}'
+    AND MP.LotType = '${vehicleType}';`
     );
 
     let primary: {
