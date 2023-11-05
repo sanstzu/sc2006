@@ -18,6 +18,7 @@ export interface Park {
 export interface MotorizedPark extends Park {
   type: "Car" | "Motor" | "Heavy";
   availableLots: number;
+  isSingleEntry: boolean;
 }
 
 export interface MotorizedParkWithPrice extends MotorizedPark {
