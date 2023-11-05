@@ -69,12 +69,14 @@ export default function Display({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, "Display">) {
   const isFocused = useIsFocused();
+  const axios = useAxios();
+
   const parking = useParkingStore.useParking();
   const prices = useParkingStore.usePrice();
-
-  const axios = useAxios();
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
+
+  const queryVehicleType = useQueryStore.useVehicleType();
 
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
   const [coordRange, setCoordRange] = useState<{
@@ -136,7 +138,7 @@ export default function Display({
           day: getShortDayOfWeek(now),
           time: getTime(now),
           order: "distance",
-          "vehicle-type": "C",
+          "vehicle-type": getVehicleCode(queryVehicleType),
           "price-start": 0,
           "price-end": 100,
         };
@@ -220,6 +222,7 @@ export default function Display({
       params: {
         longitude: userLoc?.coords.longitude,
         latitude: userLoc?.coords.latitude,
+        "vehicle-type": getVehicleCode(queryVehicleType),
       },
     });
 

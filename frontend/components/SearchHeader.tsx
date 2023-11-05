@@ -72,11 +72,11 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const parkingAxios = useAxios();
-  const vehicleTypeFilter = useQueryStore((state) => state.vehicleType);
-  const priceFilter = useQueryStore((state) => state.price);
-  const sortFilter = useQueryStore((state) => state.sort);
-  const setParkingResult = useParkingStore((state) => state.setParking);
-  const setParkingPrices = useParkingStore((state) => state.setPrice);
+  const vehicleTypeFilter = useQueryStore.useVehicleType();
+  const priceFilter = useQueryStore.usePrice();
+  const sortFilter = useQueryStore.useSort();
+  const setParkingResult = useQueryStore.useSetParking();
+  const setParkingPrices = useQueryStore.useSetPrice();
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     setIsLoading(true);
