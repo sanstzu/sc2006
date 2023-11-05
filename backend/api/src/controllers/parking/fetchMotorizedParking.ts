@@ -8,7 +8,7 @@ async function fetchMotorizedParking(
   req: Request,
   res: Response<ResponseType<GetMotorizedParkingType>>
 ) {
-  const { latitude: lat, longitude: long } = req.query;
+  const { latitude: lat, longitude: long, 'vehicle-type': vehicleType } = req.query;
   const id = req.params.id;
   
   try {
@@ -33,7 +33,8 @@ async function fetchMotorizedParking(
     JOIN ParkingPrice AS PP
     ON MP.CarParkID = PP.CarParkID
     AND MP.LotType = PP.LotType
-    WHERE MP.CarParkID = ${id};`
+    WHERE MP.CarParkID = ${id}
+    AND MP.LotType = ${vehicleType};`
     );
 
     let primary: {
