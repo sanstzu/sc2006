@@ -51,6 +51,7 @@ function getVehicleCode(vehicleType: string) {
 
 interface MotorizedSearch extends MotorizedPark {
   price: string;
+  isSingleEntry: boolean;
 }
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -76,14 +77,6 @@ export default function Display() {
   const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
-  const indexBottom = useSharedValue(-1);
-  console.log(`value ${indexBottom.value}`);
-
-  const handleSheetChanges = (index: number) => {
-    console.log(index);
-    console.log(bottomSheetIndex);
-  };
-
   const testRef = useRef(null);
 
   const mapRef = useRef<MapView>(null);
@@ -102,7 +95,6 @@ export default function Display() {
       setBottomSheetIndex(1);
     } else {
       setBottomSheetIndex(-1);
-      console.log(bottomSheetIndex);
     }
   }, [parking]);
 
@@ -124,7 +116,6 @@ export default function Display() {
   useEffect(() => {
     (async () => {
       let locationTmp = userLoc;
-      console.log(userLoc);
       if (userLoc) {
         // Get current date
         const now = new Date();
@@ -194,7 +185,6 @@ export default function Display() {
 
   // Animate to region where all parking are visible
   useEffect(() => {
-    console.log(nearbyPark);
     if (nearbyPark.length > 0 && coordRange) {
       mapRef?.current?.animateToRegion(
         {
@@ -221,7 +211,6 @@ export default function Display() {
         latitude: userLoc?.coords.latitude,
       },
     });
-    console.log(resp.data.data);
 
     const prices: Price[] = resp.data.data.prices;
 
@@ -281,13 +270,11 @@ export default function Display() {
       {parking && (
         <BottomSheet
           index={bottomSheetIndex}
-          onChange={handleSheetChanges}
           title="Parking Details"
           contentStyle={{
             flex: 1,
             width: SCREEN_WIDTH,
           }}
-          animatedIndex={indexBottom}
         >
           <ParkingInfo
             park={parking}
@@ -295,7 +282,6 @@ export default function Display() {
             onLocationPress={animateToParking}
             onParkingRemove={() => {
               setBottomSheetIndex(-1);
-              indexBottom.value = -1;
             }}
           />
         </BottomSheet>

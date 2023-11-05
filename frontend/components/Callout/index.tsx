@@ -1,9 +1,11 @@
 import { View } from "react-native";
 import { Card, IconButton, Text } from "react-native-paper";
 import { MotorizedPark } from "../../types/parking";
+import Icon from "react-native-vector-icons/FontAwesome5";
 
 interface MotorizedSearch extends MotorizedPark {
   price: string;
+  isSingleEntry: boolean;
 }
 
 function Callout({ park }: { park: MotorizedSearch }) {
@@ -25,8 +27,44 @@ function Callout({ park }: { park: MotorizedSearch }) {
         }}
       >
         <View>
-          <Text>Price: ${park.price}</Text>
-          <Text>Available Lots: {park.availableLots}</Text>
+          <View
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <Icon
+              name="dollar-sign"
+              size={16}
+              style={{
+                width: 16,
+              }}
+            />
+            <Text>
+              ${park.price}/{park.isSingleEntry ? "entry" : "hr"}
+            </Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <Icon
+              name="parking"
+              size={16}
+              style={{
+                width: 16,
+              }}
+            />
+            <Text>{park.availableLots} parks available</Text>
+          </View>
         </View>
 
         <IconButton icon="chevron-right" />
