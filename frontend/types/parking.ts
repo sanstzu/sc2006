@@ -3,6 +3,7 @@ export type Price = {
   endTime: string; // HH:MM:SS
   day: "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
   price: number;
+  isSingleEntry: boolean;
 };
 
 export interface Park {
@@ -17,6 +18,7 @@ export interface Park {
 
 export interface MotorizedPark extends Park {
   type: "Car" | "Motor" | "Heavy";
+  id: string;
   availableLots: number;
   isSingleEntry: boolean;
 }
