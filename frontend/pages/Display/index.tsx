@@ -1,4 +1,10 @@
-import { StyleSheet, View, Dimensions } from "react-native";
+import { Button, StyleSheet, View, SafeAreaView } from "react-native";
+import useParkingStore from "../../store/useParkingStore";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
+import SearchHeader from "../../components/SearchHeader";
+    
+import { StyleSheet, View, Dimensions, Button, ###Text###, SafeAreaView } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -219,7 +225,8 @@ export default function Display() {
   };
 
   return (
-    <View style={styles.page}>
+    <SafeAreaView style={styles.page}>
+      <SearchHeader navigation={navigation} />
       <MapView
         style={styles.map}
         showsUserLocation={true}
@@ -286,7 +293,7 @@ export default function Display() {
           />
         </BottomSheet>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
