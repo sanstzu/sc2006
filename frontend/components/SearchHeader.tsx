@@ -75,8 +75,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const vehicleTypeFilter = useQueryStore.useVehicleType();
   const priceFilter = useQueryStore.usePrice();
   const sortFilter = useQueryStore.useSort();
-  const setParkingResult = useQueryStore.useSetParking();
-  const setParkingPrices = useQueryStore.useSetPrice();
+  const setParkingResult = useParkingStore.useSetParking();
+  const setParkingPrices = useParkingStore.useSetPrice();
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     setIsLoading(true);
