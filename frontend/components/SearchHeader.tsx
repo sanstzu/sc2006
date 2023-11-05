@@ -20,6 +20,7 @@ import Loading from "./Loading";
 import { useIsFocused } from "@react-navigation/native";
 import { LocationObject } from "expo-location";
 import * as Location from "expo-location";
+import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -65,6 +66,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const isFocused = useIsFocused();
 
   const [searchText, setSearchText] = useState("");
+  const debounceSearchText = useDebounce(searchText, 500);
   const [searchQuery, setSearchQuery] = useState<SearchQuery>();
   const [searchState, setSearchState] = useState<SearchState>(
     SearchState.Empty
@@ -179,7 +181,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       }
 
       let locationTmp = await Location.getCurrentPositionAsync({});
-      console.log(locationTmp);
+
       setUserLoc(locationTmp);
     })();
   }, [isFocused]);
@@ -196,7 +198,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     let isMounted = true;
     (async () => {
       const newSearchState = SearchState.SearchingPlace;
-      const query: SearchQuery = { name: searchText };
+      const query: SearchQuery = { name: debounceSearchText };
       await getSearchResults(newSearchState, query);
 
       if (isMounted) setSearchState(newSearchState);
@@ -204,7 +206,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     return () => {
       isMounted = false;
     };
-  }, [searchText]);
+  }, [debounceSearchText]);
 
   const handleSelectPlace = async (place: Place) => {
     const newSearchState = SearchState.SearchingParking;
