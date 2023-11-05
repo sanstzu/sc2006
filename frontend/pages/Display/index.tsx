@@ -1,10 +1,10 @@
-import { Button, StyleSheet, View, SafeAreaView } from "react-native";
-import useParkingStore from "../../store/useParkingStore";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import SearchHeader from "../../components/SearchHeader";
-    
-import { StyleSheet, View, Dimensions, Button, ###Text###, SafeAreaView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Dimensions,
+  Button,
+  SafeAreaView,
+} from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -23,6 +23,9 @@ import { useAxios } from "../../hooks/useAxios";
 import useQueryStore from "../../store/useQueryStore";
 import ParkingInfo from "../../components/ParkingInfo";
 import { useSharedValue } from "react-native-reanimated";
+import SearchHeader from "../../components/SearchHeader";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -56,13 +59,15 @@ function getVehicleCode(vehicleType: string) {
 }
 
 interface MotorizedSearch extends MotorizedPark {
-  price: string;
+  price: number;
   isSingleEntry: boolean;
 }
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export default function Display() {
+export default function Display({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, "Display">) {
   const isFocused = useIsFocused();
   const parking = useParkingStore.useParking();
   const prices = useParkingStore.usePrice();
