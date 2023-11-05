@@ -15,7 +15,7 @@ type BottomSheetComponentProps = {
   children?: React.ReactNode;
 } & Omit<BottomSheetProps, "children" | "ref" | "snapPoints">;
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function BottomSheetComponent({
   innerRef: bottomSheetRef,
@@ -29,7 +29,7 @@ function BottomSheetComponent({
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["7%", "65%", "100%"]}
+      snapPoints={["7%", "32.5%", "65%"]}
       onChange={handleSheetChanges}
       {...rest}
     >

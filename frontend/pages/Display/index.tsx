@@ -1,8 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Dimensions } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { Card, Text, Button, IconButton } from "react-native-paper";
+import CalloutComponent from "../../components/Callout";
 import { useIsFocused } from "@react-navigation/native";
 import BottomSheet from "../../components/BottomSheet";
 import BottomSheetElement from "@gorhom/bottom-sheet";
@@ -11,9 +11,12 @@ import {
   MotorizedPark,
   MotorizedParkWithPrice,
   Park,
+  Price,
 } from "../../types/parking";
 import { useAxios } from "../../hooks/useAxios";
 import useQueryStore from "../../store/useQueryStore";
+import ParkingInfo from "../../components/ParkingInfo";
+import { useSharedValue } from "react-native-reanimated";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -50,14 +53,18 @@ interface MotorizedSearch extends MotorizedPark {
   price: string;
 }
 
+const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
+
 export default function Display() {
   const isFocused = useIsFocused();
   const parking = useParkingStore.useParking();
-  const vehicleType = useQueryStore.useVehicleType();
+  const prices = useParkingStore.usePrice();
+
   const axios = useAxios();
   const setParking = useParkingStore.useSetParking();
-  const removeParking = useParkingStore.useRemoveParking();
+  const setPricings = useParkingStore.useSetPrice();
 
+  const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
   const [coordRange, setCoordRange] = useState<{
     minLat: number;
     maxLat: number;
@@ -67,54 +74,21 @@ export default function Display() {
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
+  const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
+  const indexBottom = useSharedValue(-1);
+  console.log(`value ${indexBottom.value}`);
+
+  const handleSheetChanges = (index: number) => {
+    console.log(index);
+    console.log(bottomSheetIndex);
+  };
 
   const testRef = useRef(null);
 
   const mapRef = useRef<MapView>(null);
 
-  // Clears the parking store on each page load
-  useEffect(() => {
-    removeParking();
-  }, [isFocused]);
-
-  // Retrieves the user current location
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
-      }
-
-      let locationTmp = await Location.getCurrentPositionAsync({});
-
-      // Get current date
-      const now = new Date();
-      const reqParams = {
-        latitude: locationTmp?.coords.latitude ?? 0,
-        longitude: locationTmp?.coords.longitude ?? 0,
-        day: getShortDayOfWeek(now),
-        time: getTime(now),
-        order: "distance",
-        "vehicle-type": "C",
-        "price-start": 0,
-        "price-end": 100,
-      };
-
-      const resp = await axios.get("/parking/motorized/search", {
-        params: reqParams,
-      });
-
-      setNearbyPark(resp.data.data);
-    })();
-  }, [isFocused, parking]);
-
-  // Retrieves the parking location and animates the map to it
-  useEffect(() => {
+  const animateToParking = useCallback(() => {
     if (parking) {
       mapRef?.current?.animateToRegion(
         {
@@ -123,10 +97,59 @@ export default function Display() {
           longitudeDelta: 0.02,
           latitudeDelta: 0.02,
         },
-        0
+        250
       );
+      setBottomSheetIndex(1);
+    } else {
+      setBottomSheetIndex(-1);
+      console.log(bottomSheetIndex);
     }
   }, [parking]);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let locationTmp = await Location.getCurrentPositionAsync({});
+      setUserLoc(locationTmp);
+    })();
+  }, [isFocused, parking]);
+
+  // Retrieves the user current location
+  useEffect(() => {
+    (async () => {
+      let locationTmp = userLoc;
+      console.log(userLoc);
+      if (userLoc) {
+        // Get current date
+        const now = new Date();
+        const reqParams = {
+          latitude: locationTmp?.coords.latitude ?? 0,
+          longitude: locationTmp?.coords.longitude ?? 0,
+          day: getShortDayOfWeek(now),
+          time: getTime(now),
+          order: "distance",
+          "vehicle-type": "C",
+          "price-start": 0,
+          "price-end": 100,
+        };
+
+        const resp = await axios.get("/parking/motorized/search", {
+          params: reqParams,
+        });
+
+        setNearbyPark(resp.data.data);
+      }
+    })();
+  }, [isFocused, parking, userLoc]);
+
+  // Retrieves the parking location and animates the map to it
+  useEffect(animateToParking, [animateToParking, parking]);
 
   // Calculates the minimum and maximum latitude and longitude of the nearby parking with the current locaiton of the user
   useEffect(() => {
@@ -167,10 +190,11 @@ export default function Display() {
         }
       })();
     }
-  }, [nearbyPark]);
+  }, [nearbyPark, parking]);
 
   // Animate to region where all parking are visible
   useEffect(() => {
+    console.log(nearbyPark);
     if (nearbyPark.length > 0 && coordRange) {
       mapRef?.current?.animateToRegion(
         {
@@ -186,7 +210,24 @@ export default function Display() {
         500
       );
     }
-  }, [coordRange]);
+  }, [coordRange, nearbyPark]);
+
+  const onSelectParking = async (park: MotorizedSearch) => {
+    // fetches park
+
+    const resp = await axios.get(`/parking/motorized/${park.id}`, {
+      params: {
+        longitude: userLoc?.coords.longitude,
+        latitude: userLoc?.coords.latitude,
+      },
+    });
+    console.log(resp.data.data);
+
+    const prices: Price[] = resp.data.data.prices;
+
+    setParking(park);
+    setPricings(prices);
+  };
 
   return (
     <View style={styles.page}>
@@ -217,33 +258,10 @@ export default function Display() {
                     zIndex: 100,
                   }}
                   onPress={() => {
-                    setParking(park);
+                    onSelectParking(park);
                   }}
                 >
-                  <Card
-                    contentStyle={{
-                      width: 200,
-                      zIndex: 90,
-                    }}
-                  >
-                    <Card.Title title={park.name} />
-                    <Card.Content
-                      style={{
-                        display: "flex",
-                        width: "100%",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View>
-                        <Text>Price: ${park.price}</Text>
-                        <Text>Available Lots: {park.availableLots}</Text>
-                      </View>
-
-                      <IconButton icon="chevron-right" />
-                    </Card.Content>
-                  </Card>
+                  <CalloutComponent park={park} />
                 </Callout>
               </Marker>
             );
@@ -260,13 +278,28 @@ export default function Display() {
       </MapView>
 
       {/* Bottom sheet */}
-      <BottomSheet
-        index={0}
-        onChange={handleSheetChanges}
-        title="Parking Details"
-      >
-        {/* To be filled */}
-      </BottomSheet>
+      {parking && (
+        <BottomSheet
+          index={bottomSheetIndex}
+          onChange={handleSheetChanges}
+          title="Parking Details"
+          contentStyle={{
+            flex: 1,
+            width: SCREEN_WIDTH,
+          }}
+          animatedIndex={indexBottom}
+        >
+          <ParkingInfo
+            park={parking}
+            price={prices}
+            onLocationPress={animateToParking}
+            onParkingRemove={() => {
+              setBottomSheetIndex(-1);
+              indexBottom.value = -1;
+            }}
+          />
+        </BottomSheet>
+      )}
     </View>
   );
 }
@@ -289,17 +322,5 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
-  },
-
-  bottomSheetHeader: {
-    paddingHorizontal: 12,
-    paddingBottom: 8,
-    fontWeight: "bold",
-  },
-  bottomSheetContent: {
-    borderWidth: 1,
-    borderColor: "#d4d4d4",
-    height: 1,
-    width: "100%",
   },
 });
