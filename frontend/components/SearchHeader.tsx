@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     height: "100%",
+    zIndex: 2000,
     flex: 1,
     top: 0,
     left: 0,
