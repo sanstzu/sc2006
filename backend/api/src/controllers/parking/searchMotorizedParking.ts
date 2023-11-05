@@ -23,32 +23,39 @@ async function searchMotorizedParking(
     let long: number;
 
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
-      if (typeof req.query["place-id"] === "string") {
-        const details: {
-          name: string;
-          address: string;
-          longitude: number;
-          latitude: number;
-        } = await fetchLocationDetails(req.query["place-id"]);
-        lat = details.latitude;
-        long = details.longitude;
-      } else {
+      if (typeof req.query["place-id"] === 'string') {
+        try {
+          const details: {
+            name: string;
+            address: string;
+            longitude: number;
+            latitude: number;
+          } = await fetchLocationDetails(req.query["place-id"]);
+          lat = details.latitude;
+          long = details.longitude;
+        }
+        catch (error) {
+          console.log(error);
+          return res.status(404).json({
+            status: 0,
+            message: "Invalid place id!",
+          });
+        }
+      }
+      else {
         return res.status(404).json({
-          status: 1,
-          message: "Invalid request query!",
+          status: 0,
+          message: "Invalid place id!",
         });
       }
     } else {
-      if (
-        req.query.latitude !== undefined ||
-        req.query.longitude !== undefined
-      ) {
+      if(req.query.latitude !== undefined && req.query.longitude !== undefined) {
         lat = parseFloat(req.query.latitude.toString());
         long = parseFloat(req.query.longitude.toString());
       } else {
         return res.status(404).json({
-          status: 2,
-          message: "Invalid request query!",
+          status: 0,
+          message: "Invalid latitude and longitude!",
         });
       }
     }
@@ -65,13 +72,30 @@ async function searchMotorizedParking(
         break;
       default:
         return res.status(404).json({
-          status: 0,
-          message: "Invalid request query!",
+          status: 0,  
+          message: "Invalid request order!",
         });
     }
+
+    if (typeof day === "string" && !["mon", "tue", "wed", "thu", "fri", "sat", "sun"]) {
+      return res.status(404).json({
+        status: 0,
+        message: "Invalid request day!",
+      });
+    }
+
+    if (typeof priceStart == 'number' && typeof priceEnd == 'number' && (priceStart < 0 || priceEnd < 0)) {
+      return res.status(404).json({
+        status: 0,
+        message: "Invalid request price range!",
+      });
+    }
+
+    
+
     const [rows, fields]: [object[], object] = await query(
       `WITH Dist AS (
-      SELECT Coordinate,
+      SELECT DISTINCT Coordinate,
         ST_Distance_Sphere(
         ST_Transform(
           Coordinate, 4326), 
@@ -88,6 +112,7 @@ async function searchMotorizedParking(
     MP.AvailableLots,
     MP.Development AS Name,
     PP.Price,
+    PP.IsSingleEntry,
     D.Distance
     FROM MotorizedParking AS MP
     JOIN ParkingPrice AS PP
@@ -103,12 +128,19 @@ async function searchMotorizedParking(
     LIMIT 10;`
     );
 
+    
+
     let respData: SearchMotorizedParkingType[] = [];
     rows.forEach((obj: SearchMotorizedParkingType) => {
       if (obj.LotType === "C") obj.LotType = "Car";
       else if (obj.LotType === "H") obj.LotType = "Heavy";
       else if (obj.LotType === "Y") obj.LotType = "Motor";
-
+      else {
+        return res.status(404).json({
+          status: 0,
+          message: "Invalid vehicle type!",
+        });
+      }
       respData.push({
         type: obj.LotType,
         id: obj.CarParkID,
@@ -120,6 +152,7 @@ async function searchMotorizedParking(
         },
         distance: obj.Distance,
         price: obj.Price,
+        isSingleEntry: Boolean(obj.IsSingleEntry),
       });
     });
 
@@ -129,6 +162,7 @@ async function searchMotorizedParking(
       data: respData,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: 0,
       message: "Internal server error",
