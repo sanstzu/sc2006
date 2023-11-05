@@ -23,6 +23,7 @@ async function fetchMotorizedParking(
     PP.StartTime,
     PP.EndTime,
     PP.Price,
+    PP.IsSingleEntry,
     ST_Distance_Sphere(
       ST_Transform(
         Coordinate, 4326), 
@@ -32,7 +33,7 @@ async function fetchMotorizedParking(
     JOIN ParkingPrice AS PP
     ON MP.CarParkID = PP.CarParkID
     AND MP.LotType = PP.LotType
-    WHERE MP.CarParkID = ${id};`
+    WHERE MP.CarParkID = '${id}';`
     );
 
     let primary: {
@@ -66,6 +67,7 @@ async function fetchMotorizedParking(
         endTime: obj.EndTime,
         day: obj.Day,
         price: obj.Price,
+        isSingleEntry: Boolean(obj.IsSingleEntry),
       });
     });
 
