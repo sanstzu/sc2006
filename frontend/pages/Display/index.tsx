@@ -120,7 +120,6 @@ export default function Display({
       setUserLoc(locationTmp);
     })();
   }, [isFocused, parking]);
-  console.log(userLoc);
 
   // Retrieves nearby parking
   useEffect(() => {
@@ -173,33 +172,31 @@ export default function Display({
         maxLng: parking.coordinate.longitude,
       });
     } else {
-      (async () => {
-        let locationTmp = await Location.getCurrentPositionAsync({});
+      let locationTmp = userLoc;
 
-        let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
-        let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
-        let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
-        let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
+      let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
+      let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
+      let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
+      let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
 
-        nearbyPark.forEach((park) => {
-          minLat = Math.min(minLat, park.coordinate.latitude);
-          maxLat = Math.max(maxLat, park.coordinate.latitude);
-          minLng = Math.min(minLng, park.coordinate.longitude);
-          maxLng = Math.max(maxLng, park.coordinate.longitude);
+      nearbyPark.forEach((park) => {
+        minLat = Math.min(minLat, park.coordinate.latitude);
+        maxLat = Math.max(maxLat, park.coordinate.latitude);
+        minLng = Math.min(minLng, park.coordinate.longitude);
+        maxLng = Math.max(maxLng, park.coordinate.longitude);
+      });
+
+      if (nearbyPark.length === 0) {
+        setCoordRange(null);
+      } else {
+        setCoordRange({
+          minLat,
+          maxLat,
+          minLng,
+          maxLng,
+          zoom: undefined,
         });
-
-        if (nearbyPark.length === 0) {
-          setCoordRange(null);
-        } else {
-          setCoordRange({
-            minLat,
-            maxLat,
-            minLng,
-            maxLng,
-            zoom: undefined,
-          });
-        }
-      })();
+      }
     }
   }, [nearbyPark, parking]);
 
@@ -231,8 +228,6 @@ export default function Display({
         "vehicle-type": getVehicleCode(queryVehicleType),
       },
     });
-
-    console.log(resp);
 
     const prices: Price[] = resp.data.data.prices;
 

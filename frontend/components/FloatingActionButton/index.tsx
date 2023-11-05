@@ -15,7 +15,7 @@ function FloatingActionButton({
   const onStateChange = ({ open }: { open: boolean }) => setState({ open });
 
   const { open } = state;
-  console.log("test");
+
   return (
     <Portal>
       <FAB.Group

@@ -196,7 +196,7 @@ function ParkingInfo({
                 onValueChange={(value) => {
                   setDay(value as Price["day"]);
                 }}
-                density="high"
+                density="medium"
                 buttons={[
                   {
                     label: "Mon",
