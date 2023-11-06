@@ -355,6 +355,7 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   page: {
+    position: "relative",
     flex: 1,
     alignItems: "center",
     justifyContent: "center",

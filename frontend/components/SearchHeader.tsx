@@ -271,10 +271,10 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     <SafeAreaView
       style={[
         styles.container,
-        (isLoading ||
-          placeSearchResults.length === 0 ||
-          parkingSearchResults.length === 0) &&
-          searchText !== "" && [styles.active, styles.shadow],
+        (isLoading || searchState !== SearchState.Empty) && [
+          styles.active,
+          styles.shadow,
+        ],
       ]}
     >
       <View style={styles.header}>
@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   searchbar: {
+    flex: 1,
     flexGrow: 1,
     maxWidth: 360,
     borderRadius: 12,
