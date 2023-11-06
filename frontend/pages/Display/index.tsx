@@ -255,9 +255,9 @@ export default function Display({ navigation }: DisplayProps) {
   return (
     <SafeAreaView style={styles.page}>
       <ErrorDialog
-        message={"Test error"}
-        error={{ message: "HI" }}
-        visible={true}
+        message={errorMsg ?? ""}
+        error={"Error occurred in Display page."}
+        visible={(errorMsg && errorMsg !== "") as boolean}
       />
       <SearchHeader navigation={navigation} />
       <MapView
