@@ -85,6 +85,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const sortFilter = useQueryStore.useSort();
   const setParkingResult = useParkingStore.useSetParking();
   const setParkingPrices = useParkingStore.useSetPrice();
+  const removeParkingPrices = useParkingStore.useRemovePrice();
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     setIsLoading(true);
@@ -223,7 +224,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const handleSelectParking = async (parking: Park & { id?: string }) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
-      setParkingPrices([]);
+      removeParkingPrices();
+      navigation.navigate("Display");
       return;
     }
     setParkingResult(parking as MotorizedPark);
@@ -322,6 +324,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   searchbar: {
+    flex: 1,
     flexGrow: 1,
     maxWidth: 360,
     borderRadius: 12,
