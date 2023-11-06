@@ -17,6 +17,7 @@ const parkingStore = (
 ) => ({
   parking: null,
   price: null,
+  destination: null,
   setParking: (parking: BicyclePark | MotorizedPark) =>
     set(
       produce<ParkingStore>((state) => {

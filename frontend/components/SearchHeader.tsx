@@ -23,6 +23,10 @@ import useQueryStore from "../store/useQueryStore";
 import axios from "axios";
 import useParkingStore from "../store/useParkingStore";
 import Loading from "./Loading";
+import { useIsFocused } from "@react-navigation/native";
+import { LocationObject } from "expo-location";
+import * as Location from "expo-location";
+import { useDebounce } from "../hooks/useDebounce";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
@@ -68,7 +72,11 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     },
   };
 
+  const [userLoc, setUserLoc] = useState<LocationObject>();
+  const isFocused = useIsFocused();
+
   const [searchText, setSearchText] = useState("");
+  const debounceSearchText = useDebounce(searchText, 500);
   const [searchQuery, setSearchQuery] = useState<SearchQuery>();
   const [searchState, setSearchState] = useState<SearchState>(
     SearchState.Empty
@@ -82,9 +90,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const parkingAxios = useAxios();
-  const vehicleTypeFilter = useQueryStore((state) => state.vehicleType);
-  const priceFilter = useQueryStore((state) => state.price);
-  const sortFilter = useQueryStore((state) => state.sort);
+  const vehicleTypeFilter = useQueryStore.useVehicleType();
+  const priceFilter = useQueryStore.usePrice();
+  const sortFilter = useQueryStore.useSort();
   const setParkingResult = useParkingStore.useSetParking();
   const setParkingPrices = useParkingStore.useSetPrice();
 
@@ -174,19 +182,41 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        return;
+      }
+
+      let locationTmp = await Location.getCurrentPositionAsync({});
+
+      setUserLoc(locationTmp);
+    })();
+  }, [isFocused]);
+
   const handleSearchChange = async (text: string) => {
     setSearchText(text);
     if (text.trim() === "") {
       setSearchState(SearchState.Empty);
       return;
     }
-
-    const newSearchState = SearchState.SearchingPlace;
-    const query: SearchQuery = { name: text };
-    await getSearchResults(newSearchState, query);
-
-    setSearchState(newSearchState);
   };
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      const newSearchState = SearchState.SearchingPlace;
+      const query: SearchQuery = { name: debounceSearchText };
+      await getSearchResults(newSearchState, query);
+
+      if (isMounted) setSearchState(newSearchState);
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [debounceSearchText]);
 
   const handleSelectPlace = async (place: Place) => {
     const newSearchState = SearchState.SearchingParking;
@@ -200,7 +230,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     setSearchState(newSearchState);
   };
 
-  const handleSelectParking = async (parking: Park) => {
+  const handleSelectParking = async (parking: Park & { id?: string }) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
       setParkingPrices([]);
@@ -212,6 +242,19 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
     setSearchText("");
     setSearchState(SearchState.Empty);
+    setParkingResult(parking as MotorizedPark);
+
+    const resp = await parkingAxios.get(
+      `/parking/motorized/${parking.id as string}`,
+      {
+        params: {
+          latitude: userLoc?.coords.latitude,
+          longitude: userLoc?.coords.longitude,
+          "vehicle-type": vehicleTypeMap[vehicleTypeFilter],
+        },
+      }
+    );
+    setParkingPrices((resp.data.data as MotorizedParkWithPrice).prices);
     navigation.navigate("Display");
   };
 
@@ -285,6 +328,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
     maxHeight: WINDOW_HEIGHT * 0.75,
+    zIndex: 2000,
     flex: 1,
     top: 0,
     left: 0,

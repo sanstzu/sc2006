@@ -29,7 +29,7 @@ function BottomSheetComponent({
   return (
     <BottomSheet
       ref={bottomSheetRef}
-      snapPoints={["7%", "32.5%", "65%"]}
+      snapPoints={["7%", "26%", "65%"]}
       onChange={handleSheetChanges}
       {...rest}
     >
