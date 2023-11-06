@@ -21,14 +21,29 @@ type GoogleLocation = {
 type GoogleRouteLegStep = {
   startLocation: GoogleLocation;
   endLocation: GoogleLocation;
+  polyline: {
+    geoJsonLinestring: {
+      coordinates: [number, number][];
+    };
+  };
 };
 
 type GoogleRouteLeg = {
   steps: GoogleRouteLegStep[];
+  polyline: {
+    geoJsonLinestring: {
+      coordinates: Coordinate[];
+    };
+  };
 };
 
 type GoogleRoute = {
   legs: GoogleRouteLeg[];
+  polyline: {
+    geoJsonLinestring: {
+      coordinates: Coordinate[];
+    };
+  };
 };
 
 type GoogleRoutesV2Response = {
@@ -75,18 +90,17 @@ export async function fetchRoutePath(
       },
     },
     travelMode: travelMode,
-    routingPreference: "TRAFFIC_AWARE",
+    routingPreference: travelMode === "WALK" ? undefined : "TRAFFIC_AWARE",
   };
-
-  console.log(reqData);
 
   const response = await axios.post(url, reqData, {
     headers: {
-      "X-Goog-FieldMask":
-        "routes.legs.steps.startLocation,routes.legs.steps.endLocation",
+      "X-Goog-FieldMask": "routes.legs.steps.polyline",
     },
     params: {
       key: process.env.GOOGLE_MAPS_KEY,
+      polylineEncoding: "GEO_JSON_LINESTRING",
+      polylineQuality: "HIGH_QUALITY",
     },
   });
 
@@ -97,9 +111,13 @@ export async function fetchRoutePath(
   data.routes.forEach((route) => {
     route.legs.forEach((leg) => {
       leg.steps.forEach((step) => {
-        if (res.length > 0) res.pop();
-        res.push(step.startLocation.latLng);
-        res.push(step.endLocation.latLng);
+        console.log(step);
+        step.polyline.geoJsonLinestring.coordinates.forEach((coor) => {
+          res.push({
+            latitude: coor[1],
+            longitude: coor[0],
+          });
+        });
       });
     });
   });

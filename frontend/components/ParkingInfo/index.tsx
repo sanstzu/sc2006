@@ -21,8 +21,15 @@ import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { TimeToNumber, formatTime } from "../../utils/date";
 import useParkingStore from "../../store/useParkingStore";
 import useQueryStore from "../../store/useQueryStore";
+import { useAxios } from "../../hooks/useAxios";
+
+type Coordinate = {
+  longitude: number;
+  latitude: number;
+};
 
 type ParkingInfoProps = {
+  curLoc: Coordinate;
   park: BicyclePark | MotorizedPark;
   price: Price[] | null;
 
@@ -31,6 +38,7 @@ type ParkingInfoProps = {
 };
 
 function ParkingInfo({
+  curLoc,
   park,
   price,
   onLocationPress,
@@ -42,9 +50,13 @@ function ParkingInfo({
   const nowDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
     now.getDay()
   ] as Price["day"];
-
+  const axios = useAxios();
   const [day, setDay] = useState<Price["day"]>(nowDay);
+  const setRoute = useParkingStore.useSetRoutes();
   const removeParking = useParkingStore.useRemoveParking();
+  const removeRoutes = useParkingStore.useRemoveRoutes();
+
+  const place = useQueryStore.useCoordinate();
   const removeCoordinate = useQueryStore.useRemoveCoordinate();
 
   const openAddressOnMap = (label: string, lat: number, lng: number) => {
@@ -58,6 +70,76 @@ function ParkingInfo({
       android: `${scheme}${latLng}(${label})`,
     });
     Linking.openURL(url ?? "");
+  };
+
+  const retrieveRoutes = async () => {
+    if (!park.coordinate) return;
+    const mode =
+      park.type === "Bicycle"
+        ? "BICYCLE"
+        : park.type === "Car"
+        ? "DRIVE"
+        : park.type === "Heavy"
+        ? "DRIVE"
+        : park.type === "Motor"
+        ? "TWO_WHEELER"
+        : "BICYCLE";
+    console.log(place);
+    if (!place) {
+      const respOriginPlace = await axios.get("/maps/routes", {
+        params: {
+          originLat: curLoc.latitude,
+          originLong: curLoc.longitude,
+          destLat: park.coordinate.latitude,
+          destLong: park.coordinate.longitude,
+          mode: mode,
+        },
+      });
+
+      return setRoute([
+        {
+          polyline: respOriginPlace.data.data.routes as Coordinate[],
+          color: "#fa8c8c",
+        },
+      ]);
+    }
+    const respOriginPlace = axios.get("/maps/routes", {
+      params: {
+        originLat: curLoc.latitude,
+        originLong: curLoc.longitude,
+        destLat: park.coordinate.latitude,
+        destLong: park.coordinate.longitude,
+        mode: mode,
+      },
+    });
+
+    const respPlaceDest = axios.get("/maps/routes", {
+      params: {
+        originLat: park.coordinate.latitude,
+        originLong: park.coordinate.longitude,
+        destLat: place.latitude,
+        destLong: place.longitude,
+        mode: "WALK",
+      },
+    });
+
+    const [originPlace, placeDest] = await Promise.all([
+      respOriginPlace,
+      respPlaceDest,
+    ]);
+    const originPlaceRoute = originPlace.data.data.routes as Coordinate[];
+    const placeDestRoute = placeDest.data.data.routes as Coordinate[];
+
+    setRoute([
+      {
+        polyline: originPlaceRoute,
+        color: "#fa8c8c",
+      },
+      {
+        polyline: placeDestRoute,
+        color: "#8ce9fa",
+      },
+    ]);
   };
 
   return (
@@ -152,7 +234,11 @@ function ParkingInfo({
           />
         </Tooltip>
         <Tooltip title="Show Route">
-          <IconButton icon="directions" mode="contained"></IconButton>
+          <IconButton
+            icon="directions"
+            mode="contained"
+            onPress={retrieveRoutes}
+          />
         </Tooltip>
         <Tooltip title="Show on Google Maps">
           <IconButton
@@ -174,6 +260,7 @@ function ParkingInfo({
             onPress={() => {
               removeParking();
               removeCoordinate();
+              removeRoutes();
               if (onParkingRemove) onParkingRemove();
             }}
           ></IconButton>

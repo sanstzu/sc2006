@@ -1,5 +1,10 @@
 import { StyleSheet, View, Dimensions } from "react-native";
-import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_GOOGLE,
+  Polyline,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useRef, useCallback } from "react";
 import CalloutComponent from "../../components/Callout";
@@ -79,6 +84,7 @@ export default function Display({ navigation }: DisplayProps) {
   const prices = useParkingStore.usePrice();
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
+  const routes = useParkingStore.useRoutes();
 
   const place = useQueryStore.useCoordinate();
   const setPlace = useQueryStore.useSetCoordinate();
@@ -244,7 +250,8 @@ export default function Display({ navigation }: DisplayProps) {
       });
 
       setParking(park);
-      setPricings(prices as Array<Price>);
+      //console.log();
+      setPricings(resp.data.data.prices as Array<Price>);
     } catch (error) {
       setErrorMsg(`Failed to get motorized parking details`);
     }
@@ -298,10 +305,7 @@ export default function Display({ navigation }: DisplayProps) {
                     zIndex: 100,
                   }}
                   onPress={() => {
-                    setPlace({
-                      latitude: userLoc?.coords.latitude ?? 0,
-                      longitude: userLoc?.coords.longitude ?? 0,
-                    });
+                    console.log("bruh");
                     if (queryVehicleType === "Bicycle") {
                       onSelectBicycleParking(park as BicyclePark);
                     } else {
@@ -316,6 +320,17 @@ export default function Display({ navigation }: DisplayProps) {
           })
         ) : (
           <>
+            {routes &&
+              routes.map((route, idx) => {
+                return (
+                  <Polyline
+                    key={idx}
+                    strokeWidth={4}
+                    strokeColor={route.color}
+                    coordinates={route.polyline}
+                  />
+                );
+              })}
             <Marker
               title={parking.name}
               coordinate={{
@@ -349,6 +364,7 @@ export default function Display({ navigation }: DisplayProps) {
           }}
         >
           <ParkingInfo
+            curLoc={userLoc?.coords ?? { latitude: 0, longitude: 0 }}
             park={parking}
             price={prices}
             onLocationPress={animateToParking}
