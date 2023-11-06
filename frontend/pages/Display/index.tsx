@@ -29,6 +29,7 @@ import { useAxios } from "../../hooks/useAxios";
 import useQueryStore from "../../store/useQueryStore";
 import ParkingInfo from "../../components/ParkingInfo";
 import { useSharedValue } from "react-native-reanimated";
+import ErrorDialog from "../../components/ErrorDialog";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -253,6 +254,11 @@ export default function Display({ navigation }: DisplayProps) {
 
   return (
     <SafeAreaView style={styles.page}>
+      <ErrorDialog
+        message={"Test error"}
+        error={{ message: "HI" }}
+        visible={true}
+      />
       <SearchHeader navigation={navigation} />
       <MapView
         style={styles.map}
@@ -345,5 +351,8 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  rounded: {
+    borderRadius: 8,
   },
 });

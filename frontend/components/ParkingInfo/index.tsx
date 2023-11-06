@@ -79,11 +79,11 @@ function ParkingInfo({
       >
         <Icon
           name={
-            park.type == "Car"
+            park.type === "Car"
               ? "car"
-              : park.type == "Heavy"
+              : park.type === "Heavy"
               ? "truck"
-              : park.type == "Motor"
+              : park.type === "Motor"
               ? "motorcycle"
               : "bicycle"
           }
@@ -120,7 +120,7 @@ function ParkingInfo({
               color: "gray",
             }}
           >
-            {park.type == "Bicycle"
+            {park.type === "Bicycle"
               ? `Available racks: ${park.rackCount}`
               : `Available lots: ${park.availableLots}`}
           </Text>
@@ -129,7 +129,7 @@ function ParkingInfo({
           <Text variant="bodyMedium">
             {park.distance >= 1000
               ? `${(park.distance / 1000).toFixed(1)} km`
-              : `${park.distance} m`}
+              : `${park.distance.toFixed(0)} m`}
           </Text>
         )}
       </View>
@@ -198,10 +198,7 @@ function ParkingInfo({
                 }}
                 density="high"
                 buttons={[
-                  {
-                    label: "Mon",
-                    value: "Mon",
-                  },
+                  { label: "Mon", value: "Mon" },
                   { label: "Tue", value: "Tue" },
                   { label: "Wed", value: "Wed" },
                   { label: "Thu", value: "Thu" },

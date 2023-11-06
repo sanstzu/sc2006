@@ -85,8 +85,8 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const vehicleTypeFilter = useQueryStore((state) => state.vehicleType);
   const priceFilter = useQueryStore((state) => state.price);
   const sortFilter = useQueryStore((state) => state.sort);
-  const setParkingResult = useParkingStore((state) => state.setParking);
-  const setParkingPrices = useParkingStore((state) => state.setPrice);
+  const setParkingResult = useParkingStore.useSetParking();
+  const setParkingPrices = useParkingStore.useSetPrice();
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     setIsLoading(true);
@@ -200,15 +200,19 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     setSearchState(newSearchState);
   };
 
-  const handleSelectParking = (parking: Park) => {
+  const handleSelectParking = async (parking: Park) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
       setParkingPrices([]);
-      return;
+    } else {
+      setParkingResult(parking as MotorizedPark);
+      try {
+        // get prices
+      } catch (error) {}
     }
-    setParkingResult(parking as MotorizedPark);
-    setParkingPrices((parking as MotorizedParkWithPrice).prices);
-    navigation.navigate("Result");
+    setSearchText("");
+    setSearchState(SearchState.Empty);
+    navigation.navigate("Display");
   };
 
   useEffect(() => {
@@ -246,13 +250,13 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       </View>
       <ScrollView style={styles.resultBody}>
         {isLoading && <Loading />}
-        {searchState === SearchState.SearchingPlace && (
+        {searchState === SearchState.SearchingPlace && !isLoading && (
           <PlacesList
             places={placeSearchResults}
             onSelectChoice={handleSelectPlace}
           />
         )}
-        {searchState === SearchState.SearchingParking && (
+        {searchState === SearchState.SearchingParking && !isLoading && (
           <ResultsList
             data={parkingSearchResults}
             onSelectChoice={handleSelectParking}
