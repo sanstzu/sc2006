@@ -49,3 +49,13 @@ export interface MotorizedParkingQuery extends ParkingQuery {
 export interface BicycleParkingQuery extends ParkingQuery {
   id: string;
 }
+
+export type Coordinate = {
+  latitude: number;
+  longitude: number;
+};
+
+export type Route = {
+  polyline: Coordinate[];
+  color: string;
+};

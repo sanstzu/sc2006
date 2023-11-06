@@ -19,41 +19,47 @@ type coordinate = {
   longitude: number;
 };
 
+type SearchBicycleParkingResponse = {
+  result: SearchBicycleParkingType[];
+  latitude?: number;
+  longitude?: number;
+};
+
 async function searchBicycleParking(
   req: Request,
-  res: Response<ResponseType<SearchBicycleParkingType[]>>
+  res: Response<ResponseType<SearchBicycleParkingResponse>>
 ) {
   try {
     let coor: coordinate;
 
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
       if (typeof req.query["place-id"] === "string") {
-      const details: {
-        name: string;
-        address: string;
-        longitude: number;
-        latitude: number;
-      } = await fetchLocationDetails(req.query["place-id"]);
-      coor = {
-        latitude: details.latitude,
-        longitude: details.longitude,
-      };
-    }
-      else {
+        const details: {
+          name: string;
+          address: string;
+          longitude: number;
+          latitude: number;
+        } = await fetchLocationDetails(req.query["place-id"]);
+        coor = {
+          latitude: details.latitude,
+          longitude: details.longitude,
+        };
+      } else {
         return res.status(404).json({
           status: 0,
           message: "Invalid request query!",
         });
       }
     } else {
-
-      if (req.query.latitude !== undefined || req.query.longitude !== undefined) {
+      if (
+        req.query.latitude !== undefined ||
+        req.query.longitude !== undefined
+      ) {
         coor = {
           latitude: parseFloat(req.query.latitude.toString()),
-          longitude: parseFloat(req.query.longitude.toString())
+          longitude: parseFloat(req.query.longitude.toString()),
         };
-      }
-      else {
+      } else {
         return res.status(404).json({
           status: 0,
           message: "Invalid request query!",
@@ -119,7 +125,13 @@ async function searchBicycleParking(
     res.status(200).json({
       status: 1,
       message: "success",
-      data: sortedResult,
+      data: {
+        result: sortedResult,
+        latitude:
+          req.query["place-id"] !== undefined ? coor.latitude : undefined,
+        longitude:
+          req.query["place-id"] !== undefined ? coor.longitude : undefined,
+      },
     });
   } catch (error) {
     return res.status(500).json({
