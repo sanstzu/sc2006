@@ -129,7 +129,7 @@ function ParkingInfo({
           <Text variant="bodyMedium">
             {park.distance >= 1000
               ? `${(park.distance / 1000).toFixed(1)} km`
-              : `${park.distance.toFixed(0)} m`}
+              : `${park.distance.toFixed(1)} m`}
           </Text>
         )}
       </View>
@@ -196,7 +196,7 @@ function ParkingInfo({
                 onValueChange={(value) => {
                   setDay(value as Price["day"]);
                 }}
-                density="high"
+                density="medium"
                 buttons={[
                   { label: "Mon", value: "Mon" },
                   { label: "Tue", value: "Tue" },

@@ -1,35 +1,24 @@
-import {
-  Button,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  Dimensions,
-  Text,
-} from "react-native";
-import useParkingStore from "../../store/useParkingStore";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import SearchHeader from "../../components/SearchHeader";
-
-// import { StyleSheet, View, Dimensions, Button, ###Text###, SafeAreaView } from "react-native";
+import { StyleSheet, View, Dimensions } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import CalloutComponent from "../../components/Callout";
 import { useIsFocused } from "@react-navigation/native";
 import BottomSheet from "../../components/BottomSheet";
-import BottomSheetElement from "@gorhom/bottom-sheet";
-import {
-  MotorizedPark,
-  MotorizedParkWithPrice,
-  Park,
-  Price,
-} from "../../types/parking";
+
+import useParkingStore from "../../store/useParkingStore";
+import { BicyclePark, MotorizedPark, Price } from "../../types/parking";
 import { useAxios } from "../../hooks/useAxios";
 import useQueryStore from "../../store/useQueryStore";
 import ParkingInfo from "../../components/ParkingInfo";
-import { useSharedValue } from "react-native-reanimated";
+
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import FloatingActionButton from "../../components/FloatingActionButton";
 import ErrorDialog from "../../components/ErrorDialog";
+import SearchHeader from "../../components/SearchHeader";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -46,6 +35,7 @@ function getTime(date: Date) {
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone: "Asia/Singapore",
   });
 }
 
@@ -62,11 +52,6 @@ function getVehicleCode(vehicleType: string) {
   }
 }
 
-export interface MotorizedSearch extends MotorizedPark {
-  priceStr: string;
-  // isSingleEntry: boolean;
-}
-
 interface CoordinateRange {
   minLat: number;
   maxLat: number;
@@ -79,9 +64,15 @@ interface DisplayProps {
   navigation: NativeStackScreenProps<RootStackParamList, "Display">;
 }
 
+export interface MotorizedSearch extends MotorizedPark {
+  price: number;
+  isSingleEntry: boolean;
+}
+
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function Display({ navigation }: DisplayProps) {
+  const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const axios = useAxios();
 
@@ -90,11 +81,15 @@ export default function Display({ navigation }: DisplayProps) {
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
 
+  const queryVehicleType = useQueryStore.useVehicleType();
+
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
   const [coordRange, setCoordRange] = useState<CoordinateRange | null>(null);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
+  const [nearbyPark, setNearbyPark] = useState<
+    Array<MotorizedSearch | BicyclePark>
+  >([]);
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
   const testRef = useRef(null);
@@ -130,37 +125,46 @@ export default function Display({ navigation }: DisplayProps) {
         let locationTmp = await Location.getCurrentPositionAsync({});
         setUserLoc(locationTmp);
       } catch (error) {
-        setErrorMsg(`Failed to get location: ${error}`);
+        setErrorMsg("Failed to get current position/location");
       }
     })();
   }, [isFocused, parking]);
 
-  // Retrieves the user current location
+  // Retrieves nearby parking
   useEffect(() => {
     (async () => {
       let locationTmp = userLoc;
       if (userLoc) {
         // Get current date
-        const now = new Date();
-        const reqParams = {
-          latitude: locationTmp?.coords.latitude ?? 0,
-          longitude: locationTmp?.coords.longitude ?? 0,
-          day: getShortDayOfWeek(now),
-          time: getTime(now),
-          order: "distance",
-          "vehicle-type": "C",
-          "price-start": 0,
-          "price-end": 100,
-        };
+        if (queryVehicleType === "Bicycle") {
+          try {
+            const resp = await axios.get("/parking/bicycle/search", {
+              params: {
+                latitude: locationTmp?.coords.latitude ?? 0,
+                longitude: locationTmp?.coords.longitude ?? 0,
+              },
+            });
+            setNearbyPark(resp.data.data);
+          } catch (error) {
+            setErrorMsg("Failed to get bicycle parking from backend API");
+          }
+        } else {
+          const now = new Date();
+          const reqParams = {
+            latitude: locationTmp?.coords.latitude ?? 0,
+            longitude: locationTmp?.coords.longitude ?? 0,
+            day: getShortDayOfWeek(now),
+            time: getTime(now),
+            order: "distance",
+            "vehicle-type": getVehicleCode(queryVehicleType),
+            "price-start": 0,
+            "price-end": 10,
+          };
 
-        try {
           const resp = await axios.get("/parking/motorized/search", {
             params: reqParams,
           });
-
           setNearbyPark(resp.data.data);
-        } catch (error) {
-          setErrorMsg(`Failed to get from parking backend API: ${error}`);
         }
       }
     })();
@@ -180,37 +184,31 @@ export default function Display({ navigation }: DisplayProps) {
         maxLng: parking.coordinate.longitude,
       });
     } else {
-      (async () => {
-        try {
-          let locationTmp = await Location.getCurrentPositionAsync({});
+      let locationTmp = userLoc;
 
-          let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
-          let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
-          let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
-          let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
+      let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
+      let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
+      let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
+      let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
 
-          nearbyPark.forEach((park) => {
-            minLat = Math.min(minLat, park.coordinate.latitude);
-            maxLat = Math.max(maxLat, park.coordinate.latitude);
-            minLng = Math.min(minLng, park.coordinate.longitude);
-            maxLng = Math.max(maxLng, park.coordinate.longitude);
-          });
+      nearbyPark.forEach((park) => {
+        minLat = Math.min(minLat, park.coordinate.latitude);
+        maxLat = Math.max(maxLat, park.coordinate.latitude);
+        minLng = Math.min(minLng, park.coordinate.longitude);
+        maxLng = Math.max(maxLng, park.coordinate.longitude);
+      });
 
-          if (nearbyPark.length === 0) {
-            setCoordRange(null);
-          } else {
-            setCoordRange({
-              minLat,
-              maxLat,
-              minLng,
-              maxLng,
-              zoom: undefined,
-            });
-          }
-        } catch (error) {
-          setErrorMsg(`Failed to get current location/position: ${error}`);
-        }
-      })();
+      if (nearbyPark.length === 0) {
+        setCoordRange(null);
+      } else {
+        setCoordRange({
+          minLat,
+          maxLat,
+          minLng,
+          maxLng,
+          zoom: undefined,
+        });
+      }
     }
   }, [nearbyPark, parking]);
 
@@ -240,20 +238,33 @@ export default function Display({ navigation }: DisplayProps) {
         params: {
           longitude: userLoc?.coords.longitude,
           latitude: userLoc?.coords.latitude,
+          "vehicle-type": getVehicleCode(queryVehicleType),
         },
       });
 
-      const prices: Price[] = resp.data.data.prices;
-
       setParking(park);
-      setPricings(prices);
+      setPricings(prices as Array<Price>);
     } catch (error) {
-      setErrorMsg(`Failed to get motorized parking details: ${error}`);
+      setErrorMsg(`Failed to get motorized parking details`);
     }
   };
 
+  const onSelectBicycleParking = (park: BicyclePark) => {
+    setParking(park);
+  };
+
   return (
-    <SafeAreaView style={styles.page}>
+    <View
+      style={[
+        styles.page,
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
+    >
       <ErrorDialog
         message={errorMsg ?? ""}
         error={"Error occurred in Display page."}
@@ -287,7 +298,11 @@ export default function Display({ navigation }: DisplayProps) {
                     zIndex: 100,
                   }}
                   onPress={() => {
-                    onSelectParking(park);
+                    if (queryVehicleType === "Bicycle") {
+                      onSelectBicycleParking(park as BicyclePark);
+                    } else {
+                      onSelectParking(park as MotorizedSearch);
+                    }
                   }}
                 >
                   <CalloutComponent park={park} />
@@ -309,24 +324,29 @@ export default function Display({ navigation }: DisplayProps) {
       {/* Bottom sheet */}
       {parking && (
         <BottomSheet
-          index={bottomSheetIndex}
+          index={1}
           title="Parking Details"
           contentStyle={{
             flex: 1,
             width: SCREEN_WIDTH,
+          }}
+          style={{
+            zIndex: 101,
           }}
         >
           <ParkingInfo
             park={parking}
             price={prices}
             onLocationPress={animateToParking}
-            onParkingRemove={() => {
-              setBottomSheetIndex(-1);
-            }}
           />
         </BottomSheet>
       )}
-    </SafeAreaView>
+      <FloatingActionButton
+        visible={isFocused ? (parking ? false : true) : false}
+        onFilterPress={() => navigation.navigate("Filter")}
+        onMapSearchPress={() => navigation.navigate("Result")}
+      />
+    </View>
   );
 }
 

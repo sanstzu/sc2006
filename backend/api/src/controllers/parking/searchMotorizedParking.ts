@@ -15,10 +15,13 @@ async function searchMotorizedParking(
       time,
       order,
       "vehicle-type": vehicleType,
-      "price-start": priceStart,
-      "price-end": priceEnd,
+      "price-start": priceStartRaw,
+      "price-end": priceEndRaw,
     } = req.query;
-
+    
+    const priceStart: number = parseInt(priceStartRaw?.toString() || "-1");
+    const priceEnd: number = parseInt(priceEndRaw?.toString() || "-1");
+    
     let lat: number;
     let long: number;
 
@@ -77,21 +80,33 @@ async function searchMotorizedParking(
         });
     }
 
-    if (typeof day === "string" && !["mon", "tue", "wed", "thu", "fri", "sat", "sun"]) {
+    if (typeof day === "string" && !["mon", "tue", "wed", "thu", "fri", "sat", "sun"].includes(day.toLowerCase())) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request day!",
       });
     }
-
-    if (typeof priceStart == 'number' && typeof priceEnd == 'number' && (priceStart < 0 || priceEnd < 0)) {
+    
+    if (typeof time === "string" && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(time)) {
+      return res.status(404).json({
+        status: 0,
+        message: "Invalid request time!",
+      });
+    }
+    
+    if (typeof priceStart == 'number' && typeof priceEnd == 'number' && (priceStart < 0 || priceStart > 10 || priceEnd < 0 || priceEnd > 10)) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request price range!",
       });
     }
 
-    
+    if (typeof vehicleType === "string" && !["C", "H", "Y"].includes(vehicleType.toUpperCase())) {
+      return res.status(404).json({
+        status: 0,
+        message: "Invalid request vehicle type!",
+      });
+    }
 
     const [rows, fields]: [object[], object] = await query(
       `WITH Dist AS (

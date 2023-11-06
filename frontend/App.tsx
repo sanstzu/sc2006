@@ -8,7 +8,6 @@ import HomeScreen from "./pages/Home";
 import ParkingInfo from "./pages/Result";
 import Filter from "./pages/Filter";
 import Display from "./pages/Display";
-import Results from "./pages/Results";
 
 // Update this
 export type RootStackParamList = {
@@ -16,7 +15,6 @@ export type RootStackParamList = {
   Display: undefined;
   Result: undefined;
   Filter: undefined;
-  Results: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,7 +34,7 @@ export default function App() {
             ></Stack.Screen>
             <Stack.Screen
               name="Display"
-              options={{ title: "Display Map Screen" }}
+              options={{ title: "Display Map Screen", headerShown: false }}
               component={Display}
             />
             <Stack.Screen
@@ -48,11 +46,6 @@ export default function App() {
               name="Filter"
               options={{ title: "Filters" }}
               component={Filter}
-            />
-            <Stack.Screen
-              name="Results"
-              options={{ title: "Results" }}
-              component={Results}
             />
           </Stack.Navigator>
         </NavigationContainer>
