@@ -270,7 +270,6 @@ export default function Display({ navigation }: DisplayProps) {
         error={"Error occurred in Display page."}
         visible={(errorMsg && errorMsg !== "") as boolean}
       />
-      <SearchHeader navigation={navigation} />
       <MapView
         style={styles.map}
         showsUserLocation={true}

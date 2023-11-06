@@ -94,6 +94,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const sortFilter = useQueryStore.useSort();
   const setParkingResult = useParkingStore.useSetParking();
   const setParkingPrices = useParkingStore.useSetPrice();
+  const removeParkingPrices = useParkingStore.useRemovePrice();
 
   const getSearchResults = async (state: SearchState, query: SearchQuery) => {
     setIsLoading(true);
