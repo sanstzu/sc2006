@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "GoPark Yourself",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#d9f8ff"
     },
 
     "ios": {

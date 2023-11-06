@@ -250,7 +250,6 @@ export default function Display({ navigation }: DisplayProps) {
       });
 
       setParking(park);
-      //console.log();
       setPricings(resp.data.data.prices as Array<Price>);
     } catch (error) {
       setErrorMsg(`Failed to get motorized parking details`);
@@ -305,7 +304,6 @@ export default function Display({ navigation }: DisplayProps) {
                     zIndex: 100,
                   }}
                   onPress={() => {
-                    console.log("bruh");
                     if (queryVehicleType === "Bicycle") {
                       onSelectBicycleParking(park as BicyclePark);
                     } else {
