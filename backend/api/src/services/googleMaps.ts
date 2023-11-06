@@ -12,7 +12,7 @@ type Coordinate = {
   longitude: number;
 };
 
-export type TravelModes = "DRIVE" | "WALK" | "BYCICLE" | "TWO_WHEELER";
+export type TravelModes = "DRIVE" | "WALK" | "BICYCLE" | "TWO_WHEELER";
 
 type GoogleLocation = {
   latLng: Coordinate;
@@ -90,7 +90,10 @@ export async function fetchRoutePath(
       },
     },
     travelMode: travelMode,
-    routingPreference: travelMode === "WALK" ? undefined : "TRAFFIC_AWARE",
+    routingPreference:
+      travelMode === "WALK" || travelMode === "BICYCLE"
+        ? undefined
+        : "TRAFFIC_AWARE",
   };
 
   const response = await axios.post(url, reqData, {

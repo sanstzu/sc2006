@@ -16,11 +16,10 @@ import {
   Park,
   MotorizedPark,
   BicyclePark,
-  ParkingQuery,
   MotorizedParkWithPrice,
 } from "../types/parking";
 import useQueryStore from "../store/useQueryStore";
-import axios from "axios";
+
 import useParkingStore from "../store/useParkingStore";
 import Loading from "./Loading";
 import { useIsFocused } from "@react-navigation/native";
@@ -208,7 +207,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const handleSelectParking = async (parking: Park & { id?: string }) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
-      setParkingPrices([]);
+      removeParkingPrices();
     } else {
       setParkingResult(parking as MotorizedPark);
       try {

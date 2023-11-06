@@ -139,7 +139,7 @@ async function searchMotorizedParking(
           ST_GeomFromText(CONCAT('POINT(', ${lat}, ' ', ${long}, ')'), 4326)
         ) AS Distance
         FROM MotorizedParking
-        HAVING Distance <= 5000
+        HAVING Distance <=2000 
     )
     SELECT
     MP.CarParkID,
