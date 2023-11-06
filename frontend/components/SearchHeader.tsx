@@ -46,7 +46,7 @@ enum SearchState {
 }
 
 const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
-const WINDOW_HEIGHT = Dimensions.get("screen").height;
+// const WINDOW_HEIGHT = Dimensions.get("screen").height;
 
 export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const theme = useTheme();
@@ -182,20 +182,6 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        return;
-      }
-
-      let locationTmp = await Location.getCurrentPositionAsync({});
-
-      setUserLoc(locationTmp);
-    })();
-  }, [isFocused]);
-
   const handleSearchChange = async (text: string) => {
     setSearchText(text);
     if (text.trim() === "") {
@@ -204,20 +190,6 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      const newSearchState = SearchState.SearchingPlace;
-      const query: SearchQuery = { name: debounceSearchText };
-      await getSearchResults(newSearchState, query);
-
-      if (isMounted) setSearchState(newSearchState);
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [debounceSearchText]);
-
   const handleSelectPlace = async (place: Place) => {
     const newSearchState = SearchState.SearchingParking;
     const query: SearchQuery = {
@@ -225,7 +197,6 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       place_id: place.place_id,
     };
     setSearchQuery(query);
-    setSearchText(query.name);
     await getSearchResults(newSearchState, query);
     setSearchState(newSearchState);
   };
@@ -257,10 +228,39 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       }
     }
 
-    setSearchText("");
     setSearchState(SearchState.Empty);
     navigation.navigate("Display");
   };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status !== "granted") {
+        return;
+      }
+
+      let locationTmp = await Location.getCurrentPositionAsync({});
+
+      setUserLoc(locationTmp);
+    })();
+  }, [isFocused]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      const newSearchState = SearchState.SearchingPlace;
+      const query: SearchQuery = { name: debounceSearchText };
+      await getSearchResults(newSearchState, query);
+
+      if (isMounted) setSearchState(newSearchState);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [debounceSearchText]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -272,10 +272,10 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     <SafeAreaView
       style={[
         styles.container,
-        (isLoading || searchState !== SearchState.Empty) && [
-          styles.active,
-          styles.shadow,
-        ],
+        // (isLoading || searchState !== SearchState.Empty) && [
+        //   styles.active,
+        //   styles.shadow,
+        // ],
       ]}
     >
       <View style={styles.header}>
@@ -305,6 +305,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
         )}
         {searchState === SearchState.SearchingParking && !isLoading && (
           <ResultsList
+            placeName={searchQuery?.name ?? ""}
             data={parkingSearchResults}
             onSelectChoice={handleSelectParking}
           />
@@ -331,7 +332,8 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     width: "100%",
-    maxHeight: WINDOW_HEIGHT * 0.75,
+    // maxHeight: WINDOW_HEIGHT * 0.75,
+    height: "100%",
     flex: 1,
     top: 0,
     left: 0,

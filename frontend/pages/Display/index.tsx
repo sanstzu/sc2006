@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import FloatingActionButton from "../../components/FloatingActionButton";
 import ErrorDialog from "../../components/ErrorDialog";
-import SearchHeader from "../../components/SearchHeader";
 
 function getShortDayOfWeek(date: Date) {
   return date

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Text, StyleSheet, View, Pressable } from "react-native";
-import { IconButton } from "react-native-paper";
+import { IconButton, TouchableRipple } from "react-native-paper";
 import { MotorizedPark, Park } from "../types/parking";
 
 const mediumAvailability = 25;
@@ -16,85 +16,91 @@ export default function ResultsButton({
   onPress,
 }: ResultsButtonProps) {
   return (
-    <Pressable onPress={onPress} style={styles.resultsButton}>
-      <View
-        style={[
-          styles.container,
-          {
-            flexDirection: "column",
-            alignItems: "center",
-            flexBasis: "auto",
-            flexGrow: 0,
-          },
-        ]}
-      >
-        <View>
-          <IconButton
-            icon="circle"
-            iconColor={
-              parking.type === "Bicycle"
-                ? "#CBD5E1"
-                : (parking as MotorizedPark).availableLots > highAvailability
-                ? "#16A34A"
-                : (parking as MotorizedPark).availableLots > mediumAvailability
-                ? "#F59E0B"
-                : "#DC2626"
-            }
-            size={34}
-            style={styles.icon}
-          />
-        </View>
-        <View>
-          <Text numberOfLines={1} style={[styles.text, styles.numberText]}>
-            {!parking.distance
-              ? "NA"
-              : parking.distance < 1000
-              ? parking.distance.toFixed(0) + " m"
-              : (parking.distance / 1000).toFixed(2) + " km"}
-          </Text>
-        </View>
-      </View>
-      <View
-        style={[
-          styles.leftContainer,
-          {
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexGrow: 1,
-            flexShrink: 1,
-          },
-        ]}
-      >
-        <View style={{ flexDirection: "row", flexShrink: 1 }}>
-          <Text style={[styles.text, styles.carParkText, { marginBottom: 4 }]}>
-            {parking.name}
-          </Text>
-        </View>
+    <TouchableRipple onPress={onPress} style={styles.resultsButton}>
+      <>
         <View
           style={[
             styles.container,
             {
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "space-between",
+              flexBasis: "auto",
+              flexGrow: 0,
             },
           ]}
         >
-          <IconButton
-            icon={parking.type !== "Bicycle" ? "car-outline" : "bicycle"}
-            iconColor={"lightslategray"}
-            size={parking.type !== "Bicycle" ? 35 : 40}
-            style={[styles.icon]}
-          />
-          {Number(parking?.price) > 0 && (
-            <Text style={[styles.text, styles.numberText]}>
-              $ {Number(parking?.price).toFixed(2)}
+          <View>
+            <IconButton
+              icon="circle"
+              iconColor={
+                parking.type === "Bicycle"
+                  ? "#CBD5E1"
+                  : (parking as MotorizedPark).availableLots > highAvailability
+                  ? "#16A34A"
+                  : (parking as MotorizedPark).availableLots >
+                    mediumAvailability
+                  ? "#F59E0B"
+                  : "#DC2626"
+              }
+              size={34}
+              style={styles.icon}
+            />
+          </View>
+          <View>
+            <Text numberOfLines={1} style={[styles.text, styles.numberText]}>
+              {!parking.distance
+                ? "NA"
+                : parking.distance < 1000
+                ? parking.distance.toFixed(0) + " m"
+                : (parking.distance / 1000).toFixed(2) + " km"}
             </Text>
-          )}
+          </View>
         </View>
-      </View>
-    </Pressable>
+        <View
+          style={[
+            styles.leftContainer,
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexGrow: 1,
+              flexShrink: 1,
+            },
+          ]}
+        >
+          <View style={{ flexDirection: "row", flexShrink: 1 }}>
+            <Text
+              style={[styles.text, styles.carParkText, { marginBottom: 4 }]}
+            >
+              {parking.name}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.container,
+              {
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "space-between",
+                // flexGrow: 0,
+              },
+            ]}
+          >
+            <IconButton
+              icon={parking.type !== "Bicycle" ? "car-outline" : "bicycle"}
+              iconColor={"lightslategray"}
+              size={parking.type !== "Bicycle" ? 35 : 40}
+              style={[styles.icon]}
+            />
+            {Number(parking?.price) > 0 && (
+              <Text style={[styles.text, styles.numberText]}>
+                $ {Number(parking?.price).toFixed(2)}
+              </Text>
+            )}
+          </View>
+        </View>
+      </>
+    </TouchableRipple>
   );
 }
 
