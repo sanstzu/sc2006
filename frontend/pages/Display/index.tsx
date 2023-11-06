@@ -1,5 +1,10 @@
 import { StyleSheet, View, Dimensions } from "react-native";
-import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {
+  Callout,
+  Marker,
+  PROVIDER_GOOGLE,
+  Polyline,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useRef, useCallback } from "react";
 import CalloutComponent from "../../components/Callout";
@@ -68,7 +73,7 @@ export interface MotorizedSearch extends MotorizedPark {
   isSingleEntry: boolean;
 }
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function Display({ navigation }: DisplayProps) {
   const insets = useSafeAreaInsets();
@@ -79,7 +84,10 @@ export default function Display({ navigation }: DisplayProps) {
   const prices = useParkingStore.usePrice();
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
+  const routes = useParkingStore.useRoutes();
 
+  const place = useQueryStore.useCoordinate();
+  const setPlace = useQueryStore.useSetCoordinate();
   const queryVehicleType = useQueryStore.useVehicleType();
 
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
@@ -143,7 +151,7 @@ export default function Display({ navigation }: DisplayProps) {
                 longitude: locationTmp?.coords.longitude ?? 0,
               },
             });
-            setNearbyPark(resp.data.data);
+            setNearbyPark(resp.data.data.result);
           } catch (error) {
             setErrorMsg("Failed to get bicycle parking from backend API");
           }
@@ -163,7 +171,7 @@ export default function Display({ navigation }: DisplayProps) {
           const resp = await axios.get("/parking/motorized/search", {
             params: reqParams,
           });
-          setNearbyPark(resp.data.data);
+          setNearbyPark(resp.data.data.result);
         }
       }
     })();
@@ -242,7 +250,8 @@ export default function Display({ navigation }: DisplayProps) {
       });
 
       setParking(park);
-      setPricings(prices as Array<Price>);
+      //console.log();
+      setPricings(resp.data.data.prices as Array<Price>);
     } catch (error) {
       setErrorMsg(`Failed to get motorized parking details`);
     }
@@ -296,6 +305,7 @@ export default function Display({ navigation }: DisplayProps) {
                     zIndex: 100,
                   }}
                   onPress={() => {
+                    console.log("bruh");
                     if (queryVehicleType === "Bicycle") {
                       onSelectBicycleParking(park as BicyclePark);
                     } else {
@@ -309,13 +319,34 @@ export default function Display({ navigation }: DisplayProps) {
             );
           })
         ) : (
-          <Marker
-            title={parking.name}
-            coordinate={{
-              longitude: parking.coordinate.longitude,
-              latitude: parking.coordinate.latitude,
-            }}
-          ></Marker>
+          <>
+            {routes &&
+              routes.map((route, idx) => {
+                return (
+                  <Polyline
+                    key={idx}
+                    strokeWidth={4}
+                    strokeColor={route.color}
+                    coordinates={route.polyline}
+                  />
+                );
+              })}
+            <Marker
+              title={parking.name}
+              coordinate={{
+                longitude: parking.coordinate.longitude,
+                latitude: parking.coordinate.latitude,
+              }}
+            />
+
+            <Marker
+              title={parking.name}
+              coordinate={
+                place ?? userLoc?.coords ?? { latitude: 0, longitude: 0 }
+              }
+              pinColor="#54a2a9"
+            />
+          </>
         )}
       </MapView>
 
@@ -333,6 +364,7 @@ export default function Display({ navigation }: DisplayProps) {
           }}
         >
           <ParkingInfo
+            curLoc={userLoc?.coords ?? { latitude: 0, longitude: 0 }}
             park={parking}
             price={prices}
             onLocationPress={animateToParking}

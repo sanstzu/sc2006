@@ -5,9 +5,15 @@ import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchMotorizedParkingType = any;
 
+type SearchMotorizedParkingResponse = {
+  result: SearchMotorizedParkingType[];
+  latitude?: number;
+  longitude?: number;
+};
+
 async function searchMotorizedParking(
   req: Request,
-  res: Response<ResponseType<SearchMotorizedParkingType[]>>
+  res: Response<ResponseType<SearchMotorizedParkingResponse>>
 ) {
   try {
     let {
@@ -18,15 +24,15 @@ async function searchMotorizedParking(
       "price-start": priceStartRaw,
       "price-end": priceEndRaw,
     } = req.query;
-    
+
     const priceStart: number = parseInt(priceStartRaw?.toString() || "-1");
     const priceEnd: number = parseInt(priceEndRaw?.toString() || "-1");
-    
+
     let lat: number;
     let long: number;
 
     if (req.query.latitude === undefined || req.query.longitude === undefined) {
-      if (typeof req.query["place-id"] === 'string') {
+      if (typeof req.query["place-id"] === "string") {
         try {
           const details: {
             name: string;
@@ -36,23 +42,24 @@ async function searchMotorizedParking(
           } = await fetchLocationDetails(req.query["place-id"]);
           lat = details.latitude;
           long = details.longitude;
-        }
-        catch (error) {
+        } catch (error) {
           console.log(error);
           return res.status(404).json({
             status: 0,
             message: "Invalid place id!",
           });
         }
-      }
-      else {
+      } else {
         return res.status(404).json({
           status: 0,
           message: "Invalid place id!",
         });
       }
     } else {
-      if(req.query.latitude !== undefined && req.query.longitude !== undefined) {
+      if (
+        req.query.latitude !== undefined &&
+        req.query.longitude !== undefined
+      ) {
         lat = parseFloat(req.query.latitude.toString());
         long = parseFloat(req.query.longitude.toString());
       } else {
@@ -75,33 +82,48 @@ async function searchMotorizedParking(
         break;
       default:
         return res.status(404).json({
-          status: 0,  
+          status: 0,
           message: "Invalid request order!",
         });
     }
 
-    if (typeof day === "string" && !["mon", "tue", "wed", "thu", "fri", "sat", "sun"].includes(day.toLowerCase())) {
+    if (
+      typeof day === "string" &&
+      !["mon", "tue", "wed", "thu", "fri", "sat", "sun"].includes(
+        day.toLowerCase()
+      )
+    ) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request day!",
       });
     }
-    
-    if (typeof time === "string" && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(time)) {
+
+    if (
+      typeof time === "string" &&
+      !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(time)
+    ) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request time!",
       });
     }
-    
-    if (typeof priceStart == 'number' && typeof priceEnd == 'number' && (priceStart < 0 || priceStart > 10 || priceEnd < 0 || priceEnd > 10)) {
+
+    if (
+      typeof priceStart == "number" &&
+      typeof priceEnd == "number" &&
+      (priceStart < 0 || priceStart > 10 || priceEnd < 0 || priceEnd > 10)
+    ) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request price range!",
       });
     }
 
-    if (typeof vehicleType === "string" && !["C", "H", "Y"].includes(vehicleType.toUpperCase())) {
+    if (
+      typeof vehicleType === "string" &&
+      !["C", "H", "Y"].includes(vehicleType.toUpperCase())
+    ) {
       return res.status(404).json({
         status: 0,
         message: "Invalid request vehicle type!",
@@ -117,7 +139,7 @@ async function searchMotorizedParking(
           ST_GeomFromText(CONCAT('POINT(', ${lat}, ' ', ${long}, ')'), 4326)
         ) AS Distance
         FROM MotorizedParking
-        HAVING Distance <= 5000
+        HAVING Distance <=2000 
     )
     SELECT
     MP.CarParkID,
@@ -142,8 +164,6 @@ async function searchMotorizedParking(
     ORDER BY ${order}
     LIMIT 10;`
     );
-
-    
 
     let respData: SearchMotorizedParkingType[] = [];
     rows.forEach((obj: SearchMotorizedParkingType) => {
@@ -174,7 +194,11 @@ async function searchMotorizedParking(
     res.status(200).json({
       status: 1,
       message: "success",
-      data: respData,
+      data: {
+        result: respData,
+        latitude: req.query["place-id"] !== undefined ? lat : undefined,
+        longitude: req.query["place-id"] !== undefined ? long : undefined,
+      },
     });
   } catch (error) {
     console.log(error);
