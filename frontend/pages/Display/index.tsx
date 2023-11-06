@@ -17,6 +17,7 @@ import { RootStackParamList } from "../../App";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import FloatingActionButton from "../../components/FloatingActionButton";
+import ErrorDialog from "../../components/ErrorDialog";
 
 function getShortDayOfWeek(date: Date) {
   return date
@@ -50,16 +51,26 @@ function getVehicleCode(vehicleType: string) {
   }
 }
 
-interface MotorizedSearch extends MotorizedPark {
+interface CoordinateRange {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+  zoom?: number;
+}
+
+interface DisplayProps {
+  navigation: NativeStackScreenProps<RootStackParamList, "Display">;
+}
+
+export interface MotorizedSearch extends MotorizedPark {
   price: number;
   isSingleEntry: boolean;
 }
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export default function Display({
-  navigation,
-}: NativeStackScreenProps<RootStackParamList, "Display">) {
+export default function Display({ navigation }: DisplayProps) {
   const insets = useSafeAreaInsets();
   const isFocused = useIsFocused();
   const axios = useAxios();
@@ -72,13 +83,8 @@ export default function Display({
   const queryVehicleType = useQueryStore.useVehicleType();
 
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
-  const [coordRange, setCoordRange] = useState<{
-    minLat: number;
-    maxLat: number;
-    minLng: number;
-    maxLng: number;
-    zoom?: number;
-  } | null>(null);
+  const [coordRange, setCoordRange] = useState<CoordinateRange | null>(null);
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyPark, setNearbyPark] = useState<
     Array<MotorizedSearch | BicyclePark>
@@ -86,7 +92,6 @@ export default function Display({
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
   const testRef = useRef(null);
-
   const mapRef = useRef<MapView>(null);
 
   const animateToParking = useCallback(() => {
@@ -108,16 +113,19 @@ export default function Display({
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+
+        let locationTmp = await Location.getCurrentPositionAsync({});
+        setUserLoc(locationTmp);
+      } catch (error) {
+        setErrorMsg("Failed to get current position/location");
       }
-
-      let locationTmp = await Location.getCurrentPositionAsync({});
-
-      setUserLoc(locationTmp);
     })();
   }, [isFocused, parking]);
 
@@ -127,15 +135,18 @@ export default function Display({
       let locationTmp = userLoc;
       if (userLoc) {
         // Get current date
-
         if (queryVehicleType === "Bicycle") {
-          const resp = await axios.get("/parking/bicycle/search", {
-            params: {
-              latitude: locationTmp?.coords.latitude ?? 0,
-              longitude: locationTmp?.coords.longitude ?? 0,
-            },
-          });
-          setNearbyPark(resp.data.data);
+          try {
+            const resp = await axios.get("/parking/bicycle/search", {
+              params: {
+                latitude: locationTmp?.coords.latitude ?? 0,
+                longitude: locationTmp?.coords.longitude ?? 0,
+              },
+            });
+            setNearbyPark(resp.data.data);
+          } catch (error) {
+            setErrorMsg("Failed to get bicycle parking from backend API");
+          }
         } else {
           const now = new Date();
           const reqParams = {
@@ -221,18 +232,20 @@ export default function Display({
 
   const onSelectParking = async (park: MotorizedSearch) => {
     // fetches park
-    const resp = await axios.get(`/parking/motorized/${park.id}`, {
-      params: {
-        longitude: userLoc?.coords.longitude,
-        latitude: userLoc?.coords.latitude,
-        "vehicle-type": getVehicleCode(queryVehicleType),
-      },
-    });
+    try {
+      const resp = await axios.get(`/parking/motorized/${park.id}`, {
+        params: {
+          longitude: userLoc?.coords.longitude,
+          latitude: userLoc?.coords.latitude,
+          "vehicle-type": getVehicleCode(queryVehicleType),
+        },
+      });
 
-    const prices: Price[] = resp.data.data.prices;
-
-    setParking(park);
-    setPricings(prices);
+      setParking(park);
+      setPricings(prices as Array<Price>);
+    } catch (error) {
+      setErrorMsg(`Failed to get motorized parking details`);
+    }
   };
 
   const onSelectBicycleParking = (park: BicyclePark) => {
@@ -241,14 +254,21 @@ export default function Display({
 
   return (
     <View
-      style={{
-        ...styles.page,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        paddingLeft: insets.left,
-        paddingRight: insets.right,
-      }}
+      style={[
+        styles.page,
+        {
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
     >
+      <ErrorDialog
+        message={errorMsg ?? ""}
+        error={"Error occurred in Display page."}
+        visible={(errorMsg && errorMsg !== "") as boolean}
+      />
       <MapView
         style={styles.map}
         showsUserLocation={true}
@@ -329,7 +349,11 @@ export default function Display({
 }
 
 const styles = StyleSheet.create({
+  search: {
+    zIndex: 5,
+  },
   page: {
+    position: "relative",
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -346,5 +370,8 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     alignItems: "center",
+  },
+  rounded: {
+    borderRadius: 8,
   },
 });

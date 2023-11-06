@@ -1,5 +1,11 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { IconButton, Searchbar, useTheme } from "react-native-paper";
 import { RootStackParamList } from "../App";
 import { useEffect, useState } from "react";
@@ -38,6 +44,9 @@ enum SearchState {
   SearchingPlace,
   SearchingParking,
 }
+
+const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
+// const WINDOW_HEIGHT = Dimensions.get("screen").height;
 
 export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const theme = useTheme();
@@ -173,6 +182,56 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     }
   };
 
+  const handleSearchChange = async (text: string) => {
+    setSearchText(text);
+    if (text.trim() === "") {
+      setSearchState(SearchState.Empty);
+      return;
+    }
+  };
+
+  const handleSelectPlace = async (place: Place) => {
+    const newSearchState = SearchState.SearchingParking;
+    const query: SearchQuery = {
+      name: place.name,
+      place_id: place.place_id,
+    };
+    setSearchQuery(query);
+    await getSearchResults(newSearchState, query);
+    setSearchState(newSearchState);
+  };
+
+  const handleSelectParking = async (parking: Park & { id?: string }) => {
+    if (parking.type === "Bicycle") {
+      setParkingResult(parking as BicyclePark);
+      setParkingPrices([]);
+    } else {
+      setParkingResult(parking as MotorizedPark);
+      try {
+        // get prices
+        const { data: responseData } = await parkingAxios.get(
+          `/parking/motorized/${parking.id as string}`,
+          {
+            params: {
+              latitude: userLoc?.coords.latitude,
+              longitude: userLoc?.coords.longitude,
+              "vehicle-type": vehicleTypeMap[vehicleTypeFilter],
+            },
+          }
+        );
+        setParkingPrices((responseData.data as MotorizedParkWithPrice).prices);
+      } catch (error) {
+        console.error({
+          name: "Failed to get motorized parking details from backend parking API",
+          error,
+        });
+      }
+    }
+
+    setSearchState(SearchState.Empty);
+    navigation.navigate("Display");
+  };
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -187,16 +246,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     })();
   }, [isFocused]);
 
-  const handleSearchChange = async (text: string) => {
-    setSearchText(text);
-    if (text.trim() === "") {
-      setSearchState(SearchState.Empty);
-      return;
-    }
-  };
-
   useEffect(() => {
     let isMounted = true;
+
     (async () => {
       const newSearchState = SearchState.SearchingPlace;
       const query: SearchQuery = { name: debounceSearchText };
@@ -204,45 +256,11 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
 
       if (isMounted) setSearchState(newSearchState);
     })();
+
     return () => {
       isMounted = false;
     };
   }, [debounceSearchText]);
-
-  const handleSelectPlace = async (place: Place) => {
-    const newSearchState = SearchState.SearchingParking;
-    const query: SearchQuery = {
-      name: place.name,
-      place_id: place.place_id,
-    };
-    setSearchQuery(query);
-    setSearchText(query.name);
-    await getSearchResults(newSearchState, query);
-    setSearchState(newSearchState);
-  };
-
-  const handleSelectParking = async (parking: Park & { id?: string }) => {
-    if (parking.type === "Bicycle") {
-      setParkingResult(parking as BicyclePark);
-      removeParkingPrices();
-      navigation.navigate("Display");
-      return;
-    }
-    setParkingResult(parking as MotorizedPark);
-
-    const resp = await parkingAxios.get(
-      `/parking/motorized/${parking.id as string}`,
-      {
-        params: {
-          latitude: userLoc?.coords.latitude,
-          longitude: userLoc?.coords.longitude,
-          "vehicle-type": vehicleTypeMap[vehicleTypeFilter],
-        },
-      }
-    );
-    setParkingPrices((resp.data.data as MotorizedParkWithPrice).prices);
-    navigation.navigate("Display");
-  };
 
   useEffect(() => {
     if (searchQuery) {
@@ -251,7 +269,15 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   }, [vehicleTypeFilter, priceFilter, sortFilter]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        // (isLoading || searchState !== SearchState.Empty) && [
+        //   styles.active,
+        //   styles.shadow,
+        // ],
+      ]}
+    >
       <View style={styles.header}>
         <Searchbar
           placeholder="Search"
@@ -271,14 +297,15 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
       </View>
       <ScrollView style={styles.resultBody}>
         {isLoading && <Loading />}
-        {searchState === SearchState.SearchingPlace && (
+        {searchState === SearchState.SearchingPlace && !isLoading && (
           <PlacesList
             places={placeSearchResults}
             onSelectChoice={handleSelectPlace}
           />
         )}
-        {searchState === SearchState.SearchingParking && (
+        {searchState === SearchState.SearchingParking && !isLoading && (
           <ResultsList
+            placeName={searchQuery?.name ?? ""}
             data={parkingSearchResults}
             onSelectChoice={handleSelectParking}
           />
@@ -305,10 +332,14 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     width: "100%",
-    zIndex: 2000,
+    // maxHeight: WINDOW_HEIGHT * 0.75,
+    height: "100%",
     flex: 1,
     top: 0,
     left: 0,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    zIndex: 2,
   },
   header: {
     flexBasis: "auto",
@@ -339,9 +370,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CBD5E1",
   },
+  active: {
+    backgroundColor: "#FFF",
+  },
+  shadow: {
+    elevation: 1,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
 });
-
-const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
 
 const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -349,4 +390,5 @@ const vehicleTypeMap = {
   Car: "C",
   Motorcycle: "Y",
   "Heavy Vehicle": "H",
+  Bicycle: "B",
 };
