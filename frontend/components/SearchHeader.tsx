@@ -45,7 +45,6 @@ enum SearchState {
   SearchingParking,
 }
 
-const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
 // const WINDOW_HEIGHT = Dimensions.get("screen").height;
 
 export default function SearchHeader({ navigation }: SearchHeaderProps) {
@@ -90,7 +89,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
 
   const place = useQueryStore.useCoordinate();
   const setPlace = useQueryStore.useSetCoordinate();
-
+  console.log(place);
   const parkingAxios = useAxios();
   const vehicleTypeFilter = useQueryStore.useVehicleType();
   const priceFilter = useQueryStore.usePrice();
@@ -122,18 +121,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             let timeData: Date = new Date();
 
             try {
-              const { data: responseData } = await axios.get(
-                `${TIMEZONEDB_API_BASE_URL}/get-time-zone`,
-                {
-                  params: {
-                    key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
-                    format: "json",
-                    by: "zone",
-                    zone: "SG",
-                  },
-                }
-              );
-              timeData = new Date(responseData.timestamp);
+              timeData = new Date();
             } catch (error) {
               console.error({
                 name: "Failed to get from timezonedb API",
@@ -157,6 +145,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
               }
             );
             parkingData = responseData.data.result;
+            console.log(responseData.data);
             setPlace({
               latitude: responseData.data.latitude,
               longitude: responseData.data.longitude,
@@ -168,6 +157,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             );
 
             parkingData = responseData.data.result;
+            console.log(responseData.data);
             setPlace({
               latitude: responseData.data.latitude,
               longitude: responseData.data.longitude,

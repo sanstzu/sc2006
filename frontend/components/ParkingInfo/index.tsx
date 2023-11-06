@@ -20,6 +20,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from "@gorhom/bottom-sheet";
 import { TimeToNumber, formatTime } from "../../utils/date";
 import useParkingStore from "../../store/useParkingStore";
+import useQueryStore from "../../store/useQueryStore";
 
 type ParkingInfoProps = {
   park: BicyclePark | MotorizedPark;
@@ -44,6 +45,7 @@ function ParkingInfo({
 
   const [day, setDay] = useState<Price["day"]>(nowDay);
   const removeParking = useParkingStore.useRemoveParking();
+  const removeCoordinate = useQueryStore.useRemoveCoordinate();
 
   const openAddressOnMap = (label: string, lat: number, lng: number) => {
     const scheme = Platform.select({
@@ -171,6 +173,7 @@ function ParkingInfo({
             mode="outlined"
             onPress={() => {
               removeParking();
+              removeCoordinate();
               if (onParkingRemove) onParkingRemove();
             }}
           ></IconButton>

@@ -21,6 +21,7 @@ export type FilterStore = {
   setPrice: (price: number) => void;
   setSort: (sort: Sort) => void;
   setCoordinate: (coord: Coordinate) => void;
+  removeCoordinate: () => void;
 };
 
 const filterStore = (
@@ -50,9 +51,18 @@ const filterStore = (
     );
   },
   setCoordinate: (coord: Coordinate) => {
-    produce<FilterStore>((state) => {
-      state.coordinate = coord;
-    });
+    set(
+      produce<FilterStore>((state) => {
+        state.coordinate = coord;
+      })
+    );
+  },
+  removeCoordinate: () => {
+    set(
+      produce<FilterStore>((state) => {
+        state.coordinate = null;
+      })
+    );
   },
 });
 
