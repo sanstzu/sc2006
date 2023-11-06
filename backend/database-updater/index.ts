@@ -9,9 +9,7 @@ initializeConnection()
     console.log(
       `${new Date().toISOString()} Initialized connection to database.`
     );
-    console.log(
-      `Running with these env variables: ${JSON.stringify(process.env)}`
-    );
+
     // Insert update functions here
     updateAvailability();
     setInterval(
