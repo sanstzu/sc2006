@@ -5,9 +5,15 @@ import { fetchLocationDetails } from "@/services/googleMaps";
 
 type SearchMotorizedParkingType = any;
 
+type SearchMotorizedParkingResponse = {
+  result: SearchMotorizedParkingType[];
+  latitude?: number;
+  longitude?: number;
+};
+
 async function searchMotorizedParking(
   req: Request,
-  res: Response<ResponseType<SearchMotorizedParkingType[]>>
+  res: Response<ResponseType<SearchMotorizedParkingResponse>>
 ) {
   try {
     let {
@@ -179,10 +185,6 @@ async function searchMotorizedParking(
           latitude: obj.Latitude,
           longitude: obj.Longitude,
         },
-        placeCoordinate: {
-          latitude: lat,
-          longitude: long,
-        },
         distance: obj.Distance,
         price: obj.Price,
         isSingleEntry: Boolean(obj.IsSingleEntry),
@@ -192,7 +194,11 @@ async function searchMotorizedParking(
     res.status(200).json({
       status: 1,
       message: "success",
-      data: respData,
+      data: {
+        result: respData,
+        latitude: req.query["place-id"] !== undefined ? lat : undefined,
+        longitude: req.query["place-id"] !== undefined ? long : undefined,
+      },
     });
   } catch (error) {
     console.log(error);

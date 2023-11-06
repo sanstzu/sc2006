@@ -88,6 +88,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
+  const place = useQueryStore.useCoordinate();
+  const setPlace = useQueryStore.useSetCoordinate();
+
   const parkingAxios = useAxios();
   const vehicleTypeFilter = useQueryStore.useVehicleType();
   const priceFilter = useQueryStore.usePrice();
@@ -107,7 +110,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             "/maps/places/search",
             { params: { input: query.name } }
           );
+
           setPlaceSearchResults(responseData.data);
+
           break;
 
         case SearchState.SearchingParking:
@@ -151,14 +156,22 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 },
               }
             );
-            parkingData = responseData.data;
+            parkingData = responseData.data.result;
+            setPlace({
+              latitude: responseData.data.latitude,
+              longitude: responseData.data.longitude,
+            });
           } else {
             const { data: responseData } = await parkingAxios.get(
               "/parking/bicycle/search",
               { params: { "place-id": query?.place_id } }
             );
 
-            parkingData = responseData.data;
+            parkingData = responseData.data.result;
+            setPlace({
+              latitude: responseData.data.latitude,
+              longitude: responseData.data.longitude,
+            });
           }
 
           let nameSet = new Set(parkingData.map((parking) => parking.name));
@@ -198,6 +211,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     };
     setSearchQuery(query);
     await getSearchResults(newSearchState, query);
+
     setSearchState(newSearchState);
   };
 

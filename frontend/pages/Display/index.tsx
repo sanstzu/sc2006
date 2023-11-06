@@ -68,7 +68,7 @@ export interface MotorizedSearch extends MotorizedPark {
   isSingleEntry: boolean;
 }
 
-const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function Display({ navigation }: DisplayProps) {
   const insets = useSafeAreaInsets();
@@ -80,6 +80,8 @@ export default function Display({ navigation }: DisplayProps) {
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
 
+  const place = useQueryStore.useCoordinate();
+  const setPlace = useQueryStore.useSetCoordinate();
   const queryVehicleType = useQueryStore.useVehicleType();
 
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
@@ -143,7 +145,7 @@ export default function Display({ navigation }: DisplayProps) {
                 longitude: locationTmp?.coords.longitude ?? 0,
               },
             });
-            setNearbyPark(resp.data.data);
+            setNearbyPark(resp.data.data.result);
           } catch (error) {
             setErrorMsg("Failed to get bicycle parking from backend API");
           }
@@ -163,7 +165,7 @@ export default function Display({ navigation }: DisplayProps) {
           const resp = await axios.get("/parking/motorized/search", {
             params: reqParams,
           });
-          setNearbyPark(resp.data.data);
+          setNearbyPark(resp.data.data.result);
         }
       }
     })();
@@ -296,6 +298,10 @@ export default function Display({ navigation }: DisplayProps) {
                     zIndex: 100,
                   }}
                   onPress={() => {
+                    setPlace({
+                      latitude: userLoc?.coords.latitude ?? 0,
+                      longitude: userLoc?.coords.longitude ?? 0,
+                    });
                     if (queryVehicleType === "Bicycle") {
                       onSelectBicycleParking(park as BicyclePark);
                     } else {
@@ -309,13 +315,23 @@ export default function Display({ navigation }: DisplayProps) {
             );
           })
         ) : (
-          <Marker
-            title={parking.name}
-            coordinate={{
-              longitude: parking.coordinate.longitude,
-              latitude: parking.coordinate.latitude,
-            }}
-          ></Marker>
+          <>
+            <Marker
+              title={parking.name}
+              coordinate={{
+                longitude: parking.coordinate.longitude,
+                latitude: parking.coordinate.latitude,
+              }}
+            />
+
+            <Marker
+              title={parking.name}
+              coordinate={
+                place ?? userLoc?.coords ?? { latitude: 0, longitude: 0 }
+              }
+              pinColor="#54a2a9"
+            />
+          </>
         )}
       </MapView>
 

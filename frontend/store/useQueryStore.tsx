@@ -16,7 +16,7 @@ export type FilterStore = {
   vehicleType: Vehicle;
   price: number;
   sort: Sort;
-  coordinate: Coordinate | null;
+  coordinate: Coordinate | null; // stores the place coordinate
   setVehicleType: (vehicle: Vehicle) => void;
   setPrice: (price: number) => void;
   setSort: (sort: Sort) => void;
@@ -44,10 +44,10 @@ const filterStore = (
     ),
   setSort: (sort: Sort) => {
     set(
-    produce<FilterStore>((state) => {
-      state.sort = sort;
-    })
-    )
+      produce<FilterStore>((state) => {
+        state.sort = sort;
+      })
+    );
   },
   setCoordinate: (coord: Coordinate) => {
     produce<FilterStore>((state) => {
