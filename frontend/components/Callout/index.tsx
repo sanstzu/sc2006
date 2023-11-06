@@ -2,11 +2,7 @@ import { View } from "react-native";
 import { Card, IconButton, Text } from "react-native-paper";
 import { MotorizedPark } from "../../types/parking";
 import Icon from "react-native-vector-icons/FontAwesome5";
-
-interface MotorizedSearch extends MotorizedPark {
-  price: string;
-  isSingleEntry: boolean;
-}
+import { MotorizedSearch } from "../../pages/Display";
 
 function Callout({ park }: { park: MotorizedSearch }) {
   return (

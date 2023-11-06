@@ -1,10 +1,17 @@
-import { Button, StyleSheet, View, SafeAreaView } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Dimensions,
+  Text,
+} from "react-native";
 import useParkingStore from "../../store/useParkingStore";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import SearchHeader from "../../components/SearchHeader";
-    
-import { StyleSheet, View, Dimensions, Button, ###Text###, SafeAreaView } from "react-native";
+
+// import { StyleSheet, View, Dimensions, Button, ###Text###, SafeAreaView } from "react-native";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -12,7 +19,6 @@ import CalloutComponent from "../../components/Callout";
 import { useIsFocused } from "@react-navigation/native";
 import BottomSheet from "../../components/BottomSheet";
 import BottomSheetElement from "@gorhom/bottom-sheet";
-import useParkingStore from "../../store/useParkingStore";
 import {
   MotorizedPark,
   MotorizedParkWithPrice,
@@ -55,36 +61,42 @@ function getVehicleCode(vehicleType: string) {
   }
 }
 
-interface MotorizedSearch extends MotorizedPark {
-  price: string;
-  isSingleEntry: boolean;
+export interface MotorizedSearch extends MotorizedPark {
+  priceStr: string;
+  // isSingleEntry: boolean;
+}
+
+interface CoordinateRange {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+  zoom?: number;
+}
+
+interface DisplayProps {
+  navigation: NativeStackScreenProps<RootStackParamList, "Display">;
 }
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export default function Display() {
+export default function Display({ navigation }: DisplayProps) {
   const isFocused = useIsFocused();
+  const axios = useAxios();
+
   const parking = useParkingStore.useParking();
   const prices = useParkingStore.usePrice();
-
-  const axios = useAxios();
   const setParking = useParkingStore.useSetParking();
   const setPricings = useParkingStore.useSetPrice();
 
   const [userLoc, setUserLoc] = useState<Location.LocationObject | null>(null);
-  const [coordRange, setCoordRange] = useState<{
-    minLat: number;
-    maxLat: number;
-    minLng: number;
-    maxLng: number;
-    zoom?: number;
-  } | null>(null);
+  const [coordRange, setCoordRange] = useState<CoordinateRange | null>(null);
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [nearbyPark, setNearbyPark] = useState<MotorizedSearch[]>([]);
   const [bottomSheetIndex, setBottomSheetIndex] = useState(-1);
 
   const testRef = useRef(null);
-
   const mapRef = useRef<MapView>(null);
 
   const animateToParking = useCallback(() => {
@@ -106,15 +118,19 @@ export default function Display() {
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
+        if (status !== "granted") {
+          setErrorMsg("Permission to access location was denied");
+          return;
+        }
+
+        let locationTmp = await Location.getCurrentPositionAsync({});
+        setUserLoc(locationTmp);
+      } catch (error) {
+        setErrorMsg(`Failed to get location: ${error}`);
       }
-
-      let locationTmp = await Location.getCurrentPositionAsync({});
-      setUserLoc(locationTmp);
     })();
   }, [isFocused, parking]);
 
@@ -136,11 +152,15 @@ export default function Display() {
           "price-end": 100,
         };
 
-        const resp = await axios.get("/parking/motorized/search", {
-          params: reqParams,
-        });
+        try {
+          const resp = await axios.get("/parking/motorized/search", {
+            params: reqParams,
+          });
 
-        setNearbyPark(resp.data.data);
+          setNearbyPark(resp.data.data);
+        } catch (error) {
+          setErrorMsg(`Failed to get from parking backend API: ${error}`);
+        }
       }
     })();
   }, [isFocused, parking, userLoc]);
@@ -160,30 +180,34 @@ export default function Display() {
       });
     } else {
       (async () => {
-        let locationTmp = await Location.getCurrentPositionAsync({});
+        try {
+          let locationTmp = await Location.getCurrentPositionAsync({});
 
-        let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
-        let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
-        let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
-        let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
+          let minLat = locationTmp?.coords.latitude ?? Number.MAX_VALUE;
+          let maxLat = locationTmp?.coords.latitude ?? Number.MIN_VALUE;
+          let minLng = locationTmp?.coords.longitude ?? Number.MAX_VALUE;
+          let maxLng = locationTmp?.coords.longitude ?? Number.MIN_VALUE;
 
-        nearbyPark.forEach((park) => {
-          minLat = Math.min(minLat, park.coordinate.latitude);
-          maxLat = Math.max(maxLat, park.coordinate.latitude);
-          minLng = Math.min(minLng, park.coordinate.longitude);
-          maxLng = Math.max(maxLng, park.coordinate.longitude);
-        });
-
-        if (nearbyPark.length === 0) {
-          setCoordRange(null);
-        } else {
-          setCoordRange({
-            minLat,
-            maxLat,
-            minLng,
-            maxLng,
-            zoom: undefined,
+          nearbyPark.forEach((park) => {
+            minLat = Math.min(minLat, park.coordinate.latitude);
+            maxLat = Math.max(maxLat, park.coordinate.latitude);
+            minLng = Math.min(minLng, park.coordinate.longitude);
+            maxLng = Math.max(maxLng, park.coordinate.longitude);
           });
+
+          if (nearbyPark.length === 0) {
+            setCoordRange(null);
+          } else {
+            setCoordRange({
+              minLat,
+              maxLat,
+              minLng,
+              maxLng,
+              zoom: undefined,
+            });
+          }
+        } catch (error) {
+          setErrorMsg(`Failed to get current location/position: ${error}`);
         }
       })();
     }
@@ -210,18 +234,21 @@ export default function Display() {
 
   const onSelectParking = async (park: MotorizedSearch) => {
     // fetches park
+    try {
+      const resp = await axios.get(`/parking/motorized/${park.id}`, {
+        params: {
+          longitude: userLoc?.coords.longitude,
+          latitude: userLoc?.coords.latitude,
+        },
+      });
 
-    const resp = await axios.get(`/parking/motorized/${park.id}`, {
-      params: {
-        longitude: userLoc?.coords.longitude,
-        latitude: userLoc?.coords.latitude,
-      },
-    });
+      const prices: Price[] = resp.data.data.prices;
 
-    const prices: Price[] = resp.data.data.prices;
-
-    setParking(park);
-    setPricings(prices);
+      setParking(park);
+      setPricings(prices);
+    } catch (error) {
+      setErrorMsg(`Failed to get motorized parking details: ${error}`);
+    }
   };
 
   return (
@@ -298,6 +325,9 @@ export default function Display() {
 }
 
 const styles = StyleSheet.create({
+  search: {
+    zIndex: 5,
+  },
   page: {
     flex: 1,
     alignItems: "center",

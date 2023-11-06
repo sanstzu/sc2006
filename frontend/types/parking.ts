@@ -20,7 +20,7 @@ export interface Park {
 
 export interface MotorizedPark extends Park {
   type: "Car" | "Motor" | "Heavy";
-  id: string;
+  // id: string;
   availableLots: number;
   isSingleEntry: boolean;
 }

@@ -1,5 +1,11 @@
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { IconButton, Searchbar, useTheme } from "react-native-paper";
 import { RootStackParamList } from "../App";
 import { useEffect, useState } from "react";
@@ -20,6 +26,7 @@ import Loading from "./Loading";
 
 interface SearchHeaderProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any, any>;
+  children: React.ReactNode;
 }
 
 interface SearchQuery {
@@ -34,6 +41,9 @@ enum SearchState {
   SearchingPlace,
   SearchingParking,
 }
+
+const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
+const WINDOW_HEIGHT = Dimensions.get("screen").height;
 
 export default function SearchHeader({ navigation }: SearchHeaderProps) {
   const theme = useTheme();
@@ -208,7 +218,15 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   }, [vehicleTypeFilter, priceFilter, sortFilter]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        (isLoading ||
+          placeSearchResults.length === 0 ||
+          parkingSearchResults.length === 0) &&
+          searchText !== "" && [styles.active, styles.shadow],
+      ]}
+    >
       <View style={styles.header}>
         <Searchbar
           placeholder="Search"
@@ -262,10 +280,13 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     width: "100%",
-    height: "100%",
+    maxHeight: WINDOW_HEIGHT * 0.75,
     flex: 1,
     top: 0,
     left: 0,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    zIndex: 2,
   },
   header: {
     flexBasis: "auto",
@@ -295,9 +316,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#CBD5E1",
   },
+  active: {
+    backgroundColor: "#FFF",
+  },
+  shadow: {
+    elevation: 1,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
 });
-
-const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
 
 const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
