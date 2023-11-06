@@ -1,0 +1,12 @@
+{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "http://54.79.82.197:8080/"
+      }
+    }
+  }
+}
