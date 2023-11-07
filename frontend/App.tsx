@@ -4,14 +4,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { MD3LightTheme, PaperProvider } from "react-native-paper";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import HomeScreen from "./pages/Home";
 import ParkingInfo from "./pages/Result";
 import Filter from "./pages/Filter";
 import Display from "./pages/Display";
 
 // Update this
 export type RootStackParamList = {
-  Home: undefined;
   Display: undefined;
   Result: undefined;
   Filter: undefined;
@@ -25,13 +23,6 @@ export default function App() {
       <PaperProvider theme={MD3LightTheme}>
         <NavigationContainer>
           <Stack.Navigator>
-            <Stack.Screen
-              name="Home"
-              options={{
-                title: "Home Screen",
-              }}
-              component={HomeScreen}
-            ></Stack.Screen>
             <Stack.Screen
               name="Display"
               options={{ title: "Display Map Screen", headerShown: false }}

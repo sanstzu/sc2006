@@ -16,11 +16,10 @@ import {
   Park,
   MotorizedPark,
   BicyclePark,
-  ParkingQuery,
   MotorizedParkWithPrice,
 } from "../types/parking";
 import useQueryStore from "../store/useQueryStore";
-import axios from "axios";
+
 import useParkingStore from "../store/useParkingStore";
 import Loading from "./Loading";
 import { useIsFocused } from "@react-navigation/native";
@@ -45,7 +44,6 @@ enum SearchState {
   SearchingParking,
 }
 
-const TIMEZONEDB_API_BASE_URL = "http://api.timezonedb.com/v2.1";
 // const WINDOW_HEIGHT = Dimensions.get("screen").height;
 
 export default function SearchHeader({ navigation }: SearchHeaderProps) {
@@ -88,6 +86,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
+  const place = useQueryStore.useCoordinate();
+  const setPlace = useQueryStore.useSetCoordinate();
+  console.log(place);
   const parkingAxios = useAxios();
   const vehicleTypeFilter = useQueryStore.useVehicleType();
   const priceFilter = useQueryStore.usePrice();
@@ -107,7 +108,9 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             "/maps/places/search",
             { params: { input: query.name } }
           );
+
           setPlaceSearchResults(responseData.data);
+
           break;
 
         case SearchState.SearchingParking:
@@ -117,18 +120,7 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
             let timeData: Date = new Date();
 
             try {
-              const { data: responseData } = await axios.get(
-                `${TIMEZONEDB_API_BASE_URL}/get-time-zone`,
-                {
-                  params: {
-                    key: process.env.EXPO_PUBLIC_TIMEZONEDB_API_KEY,
-                    format: "json",
-                    by: "zone",
-                    zone: "SG",
-                  },
-                }
-              );
-              timeData = new Date(responseData.timestamp);
+              timeData = new Date();
             } catch (error) {
               console.error({
                 name: "Failed to get from timezonedb API",
@@ -151,14 +143,24 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
                 },
               }
             );
-            parkingData = responseData.data;
+            parkingData = responseData.data.result;
+            console.log(responseData.data);
+            setPlace({
+              latitude: responseData.data.latitude,
+              longitude: responseData.data.longitude,
+            });
           } else {
             const { data: responseData } = await parkingAxios.get(
               "/parking/bicycle/search",
               { params: { "place-id": query?.place_id } }
             );
 
-            parkingData = responseData.data;
+            parkingData = responseData.data.result;
+            console.log(responseData.data);
+            setPlace({
+              latitude: responseData.data.latitude,
+              longitude: responseData.data.longitude,
+            });
           }
 
           let nameSet = new Set(parkingData.map((parking) => parking.name));
@@ -198,13 +200,14 @@ export default function SearchHeader({ navigation }: SearchHeaderProps) {
     };
     setSearchQuery(query);
     await getSearchResults(newSearchState, query);
+
     setSearchState(newSearchState);
   };
 
   const handleSelectParking = async (parking: Park & { id?: string }) => {
     if (parking.type === "Bicycle") {
       setParkingResult(parking as BicyclePark);
-      setParkingPrices([]);
+      removeParkingPrices();
     } else {
       setParkingResult(parking as MotorizedPark);
       try {

@@ -87,7 +87,15 @@ export default function ResultsButton({
             ]}
           >
             <IconButton
-              icon={parking.type !== "Bicycle" ? "car-outline" : "bicycle"}
+              icon={
+                parking.type === "Car"
+                  ? "car-outline"
+                  : parking.type === "Heavy"
+                  ? "truck"
+                  : parking.type === "Motor"
+                  ? "motorbike"
+                  : "bicycle"
+              }
               iconColor={"lightslategray"}
               size={parking.type !== "Bicycle" ? 35 : 40}
               style={[styles.icon]}
