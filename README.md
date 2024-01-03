@@ -4,7 +4,7 @@
 ## Overview
 Due to our client-server architecture, this application is mainly separated into two parts: the Frontend and Backend.
 
-The Frontend (`frontend/`) is developed using React Native and React Native Paper for the UI.
+The Frontend (`frontend/`) is developed using React Native, React Native Paper for the UI, and Zustand for global state management.
 
 The Backend (`backend/`) is developed using Node.js with Express framework, MySQL database for storing parking information and performing queries, and Docker for easier deployment in our remote AWS EC2 server.
 
