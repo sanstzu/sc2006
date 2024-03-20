@@ -1,3 +1,4 @@
+> Please ignore the latest failing GitHub Actions as it was meant to automatically sync our repository with the repository provided by our Lab Technician.
 # GoParkYourself
 *A mobile application developed for the SC2006 Software Engineering module in NTU, which displays live motorized and bicycle parking data across Singapore.*
 
